@@ -7,7 +7,7 @@ import ActivityLog from '../components/ActivityLog';
 import { useMonthlyStatus } from '../hooks/useMonthlyStatus';
 
 const Dashboard: React.FC = () => {
-    const { status, loading, addTransaction, markFullUsage, donateSurplus } = useMonthlyStatus();
+    const { status, loading, addTransaction, markFullUsage, donateSurplus, resetMonth } = useMonthlyStatus();
 
     if (loading) {
         return (
@@ -55,14 +55,27 @@ const Dashboard: React.FC = () => {
                             <p className="text-muted">You have marked your monthly minimum as fully used.</p>
                         </div>
                     ) : (
-                        <AddTransaction onAdd={addTransaction} />
+                        <AddTransaction
+                            onAdd={addTransaction}
+                            transactionCount={status.transactions.length}
+                        />
                     )}
 
                     <div className="mt-6">
                         <ActivityLog transactions={status.transactions} />
                     </div>
 
-
+                    {import.meta.env.DEV && (
+                        <div className="mt-8 text-center">
+                            <button
+                                onClick={resetMonth}
+                                className="text-xs text-muted hover:text-danger underline"
+                                style={{ background: 'none', border: 'none', cursor: 'pointer' }}
+                            >
+                                Reset My Data (Dev Only)
+                            </button>
+                        </div>
+                    )}
                 </div>
             </div>
         </DashboardLayout>
