@@ -16,26 +16,40 @@ const Login: React.FC = () => {
             setError('');
             setIsLoading(true);
 
+            console.log('[Login] Starting Google sign-in...');
             await signInWithGoogle();
+            console.log('[Login] Google sign-in complete');
 
             // Get the current user immediately after sign-in
             const user = auth.currentUser;
+            console.log('[Login] Current user:', user?.uid);
+
             if (!user) {
-                throw new Error('Sign in failed');
+                throw new Error('Sign in failed - no user returned');
             }
 
             // Check if user profile exists
-            const userDoc = await getDoc(doc(db, 'users', user.uid));
+            console.log('[Login] Checking Firestore for user profile...');
+            try {
+                const userDoc = await getDoc(doc(db, 'users', user.uid));
+                console.log('[Login] Firestore response:', userDoc.exists() ? 'Profile exists' : 'No profile');
 
-            if (userDoc.exists()) {
-                // Existing user - go directly to dashboard
-                navigate('/dashboard', { replace: true });
-            } else {
-                // New user - go to onboarding
-                navigate('/onboarding', { replace: true });
+                if (userDoc.exists()) {
+                    navigate('/dashboard', { replace: true });
+                } else {
+                    navigate('/onboarding', { replace: true });
+                }
+            } catch (firestoreError: any) {
+                console.error('[Login] Firestore error:', firestoreError);
+                // If Firestore fails, still try to proceed to onboarding
+                // The user is authenticated, just can't check profile
+                setError(`Database error: ${firestoreError.message}. Redirecting to setup...`);
+                setTimeout(() => {
+                    navigate('/onboarding', { replace: true });
+                }, 2000);
             }
         } catch (error: any) {
-            console.error("Login failed", error);
+            console.error('[Login] Error:', error);
             setError(error.message || 'Failed to sign in');
         } finally {
             setIsLoading(false);
