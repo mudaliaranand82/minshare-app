@@ -12,6 +12,7 @@ const Onboarding: React.FC = () => {
     const [memberId, setMemberId] = useState('');
     const [phone, setPhone] = useState('');
     const [loading, setLoading] = useState(false);
+    const [checking, setChecking] = useState(true);
 
     React.useEffect(() => {
         if (currentUser?.displayName) {
@@ -23,17 +24,22 @@ const Onboarding: React.FC = () => {
 
     React.useEffect(() => {
         const checkProfile = async () => {
-            if (!currentUser) return;
+            if (!currentUser) {
+                setChecking(false);
+                return;
+            }
             const docRef = doc(db, 'users', currentUser.uid);
-            // We need 'getDoc'
             try {
                 const { getDoc } = await import('firebase/firestore');
                 const docSnap = await getDoc(docRef);
                 if (docSnap.exists()) {
-                    navigate('/dashboard');
+                    navigate('/dashboard', { replace: true });
+                } else {
+                    setChecking(false);
                 }
             } catch (err) {
                 console.error("Error checking profile:", err);
+                setChecking(false);
             }
         };
         checkProfile();
@@ -64,10 +70,22 @@ const Onboarding: React.FC = () => {
         }
     };
 
+    // Show loading while checking profile
+    if (checking) {
+        return (
+            <div className="flex items-center justify-center min-h-screen" style={{ background: 'var(--color-bg-main)' }}>
+                <div className="text-center">
+                    <div className="text-xl font-bold text-primary">Loading...</div>
+                    <p className="text-muted mt-2">Checking your profile...</p>
+                </div>
+            </div>
+        );
+    }
+
     return (
-        <div className="flex items-center justify-center min-h-screen">
-            <div className="glass-card" style={{ maxWidth: '500px', width: '100%' }}>
-                <h2 className="text-center mb-4">Complete Your Profile</h2>
+        <div className="flex items-center justify-center min-h-screen" style={{ background: 'var(--color-bg-main)', padding: '2rem' }}>
+            <div className="glass-card" style={{ maxWidth: '500px', width: '100%', margin: '0 auto' }}>
+                <h2 className="text-center mb-4" style={{ color: 'var(--color-primary)', fontFamily: 'var(--font-heading)' }}>Complete Your Profile</h2>
                 <p className="text-center text-muted mb-6">Please confirm your details to set up your account.</p>
                 <form onSubmit={handleSubmit} className="flex flex-col gap-4">
                     <div className="flex gap-4">

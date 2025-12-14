@@ -39,6 +39,9 @@ const DashboardLayout: React.FC<DashboardLayoutProps> = ({ children }) => {
                         <h1 style={{ fontSize: '1.5rem', margin: 0, color: 'var(--color-primary)', fontWeight: 700, fontFamily: 'var(--font-heading)' }}>MinShare</h1>
                     </div>
                     <div className="flex items-center gap-4">
+                        <Link to="/onboarding" className="text-sm font-medium text-muted hover:text-primary transition-colors">
+                            Profile
+                        </Link>
                         <Link to="/admin" className="text-sm font-medium text-muted hover:text-primary transition-colors">
                             Admin
                         </Link>

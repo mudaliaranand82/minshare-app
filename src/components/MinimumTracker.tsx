@@ -48,7 +48,7 @@ const MinimumTracker: React.FC<MinimumTrackerProps> = ({ currentUsage, monthlyMi
                             ${currentUsage.toFixed(2)} of ${monthlyMinimum.toFixed(2)}
                         </div>
                     </div>
-                    <p className="text-sm text-muted">You have <strong>${remaining.toFixed(2)}</strong> left on your minimum.</p>
+                    <p className="text-sm text-muted">Remaining: <strong>${remaining.toFixed(2)}</strong></p>
                 </div>
 
                 {remaining > 0 && (
@@ -57,13 +57,13 @@ const MinimumTracker: React.FC<MinimumTrackerProps> = ({ currentUsage, monthlyMi
                             onClick={onMarkFull}
                             className="btn btn-primary flex items-center justify-center w-full"
                             style={{
-                                height: '2.5rem',
-                                fontSize: '0.9rem',
+                                height: '2.75rem',
+                                fontSize: '0.95rem',
                                 whiteSpace: 'nowrap',
-                                borderRadius: '1.25rem'
+                                borderRadius: '1.5rem'
                             }}
                         >
-                            Use Remaining ${remaining.toFixed(2)}
+                            Mark as Fully Used
                         </button>
                     </div>
                 )}

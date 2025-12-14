@@ -27,7 +27,8 @@ const Dashboard: React.FC = () => {
 
     return (
         <DashboardLayout>
-            <div className="mb-6 flex justify-between items-end">
+            {/* Header with better spacing */}
+            <div className="mb-8 flex justify-between items-end">
                 <div>
                     <h2 style={{ fontSize: '2rem', margin: '0 0 0.5rem 0', color: 'var(--color-primary)', fontFamily: 'var(--font-heading)' }}>{monthName}</h2>
                     <p style={{ margin: 0, color: 'var(--color-text-muted)', fontSize: '1.1rem' }}>{formattedDate}</p>
@@ -35,21 +36,23 @@ const Dashboard: React.FC = () => {
             </div>
 
             {/* 1. Monthly Minimum Tracker - Prominent First Card */}
-            <MinimumTracker
-                currentUsage={status.actualUsage}
-                monthlyMinimum={75}
-                isFullUsage={status.isFullUsage}
-                onMarkFull={markFullUsage}
-            />
+            <div className="mb-8">
+                <MinimumTracker
+                    currentUsage={status.actualUsage}
+                    monthlyMinimum={75}
+                    isFullUsage={status.isFullUsage}
+                    onMarkFull={markFullUsage}
+                />
+            </div>
 
             {/* 2. Combined Log Spending & Activity Card */}
-            <div className="glass-card mb-6">
+            <div className="glass-card mb-8">
                 <div className="grid gap-8 md:grid-cols-2">
                     {/* Left Panel: Input / Status */}
-                    <div className="h-full">
+                    <div className="h-full" style={{ minHeight: '200px' }}>
                         {status.isFullUsage ? (
                             <div className="h-full flex flex-col items-center justify-center text-center p-4">
-                                <h3 style={{ color: 'var(--color-primary)', marginBottom: '0.5rem', fontSize: '1.25rem' }}>Minimum Met! 🎉</h3>
+                                <h3 style={{ color: 'var(--color-primary)', marginBottom: '0.5rem', fontSize: '1.25rem', fontFamily: 'var(--font-heading)' }}>Minimum Met! 🎉</h3>
                                 <p className="text-muted">You have marked your monthly minimum as fully used.</p>
                             </div>
                         ) : (
@@ -61,20 +64,22 @@ const Dashboard: React.FC = () => {
                     </div>
 
                     {/* Right Panel: Activity Log */}
-                    <div className="md:border-l border-glass-border md:pl-8">
+                    <div className="md:border-l md:pl-8" style={{ borderColor: 'rgba(61, 103, 53, 0.1)' }}>
                         <ActivityLog transactions={status.transactions} />
                     </div>
                 </div>
             </div>
 
             {/* 3. Donation / Share Surplus Card */}
-            <DonationWidget
-                surplus={surplus}
-                onDonate={donateSurplus}
-            />
+            <div className="mb-8">
+                <DonationWidget
+                    surplus={surplus}
+                    onDonate={donateSurplus}
+                />
+            </div>
 
-            <div className="mt-8">
-                {/* Footer or Spacing */}
+            <div className="mt-4">
+                {/* Footer spacing */}
             </div>
         </DashboardLayout>
     );
