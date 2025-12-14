@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
-import { doc, setDoc } from 'firebase/firestore';
+import { doc, setDoc, getDoc } from 'firebase/firestore';
 import { db } from '../firebase';
 
 const Onboarding: React.FC = () => {
@@ -28,10 +28,8 @@ const Onboarding: React.FC = () => {
                 setChecking(false);
                 return;
             }
-            const docRef = doc(db, 'users', currentUser.uid);
             try {
-                const { getDoc } = await import('firebase/firestore');
-                const docSnap = await getDoc(docRef);
+                const docSnap = await getDoc(doc(db, 'users', currentUser.uid));
                 if (docSnap.exists()) {
                     navigate('/dashboard', { replace: true });
                 } else {
