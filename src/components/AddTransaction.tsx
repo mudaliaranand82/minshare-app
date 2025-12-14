@@ -34,8 +34,8 @@ const AddTransaction: React.FC<AddTransactionProps> = ({ onAdd, transactionCount
     };
 
     return (
-        <div className="glass-card">
-            <h2 style={{ fontSize: '1.25rem', marginBottom: '1rem', fontFamily: 'var(--font-heading)', color: 'var(--color-primary)' }}>Log Spending</h2>
+        <div className="h-full">
+            <h2 style={{ fontSize: '1.25rem', marginBottom: '1rem', fontFamily: 'var(--font-heading)', color: 'var(--color-primary)' }}>Log Transactions</h2>
             <form onSubmit={handleSubmit} className="flex flex-col gap-4">
                 <div>
                     <label style={{ display: 'block', marginBottom: '0.5rem', fontSize: '0.875rem', fontWeight: 500 }}>Amount ($)</label>
@@ -51,7 +51,7 @@ const AddTransaction: React.FC<AddTransactionProps> = ({ onAdd, transactionCount
                     />
                 </div>
                 <div>
-                    <label style={{ display: 'block', marginBottom: '0.5rem', fontSize: '0.875rem', fontWeight: 500 }}>Description</label>
+                    <label style={{ display: 'block', marginBottom: '0.5rem', fontSize: '0.875rem', fontWeight: 500 }}>Note</label>
                     <input
                         type="text"
                         value={description}

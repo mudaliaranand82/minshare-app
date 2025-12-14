@@ -58,7 +58,7 @@ export const useMonthlyStatus = () => {
         });
 
         return unsubscribe;
-    }, [currentUser, currentMonth]);
+    }, [currentUser?.uid, currentMonth]);
 
     const updatePlannedUsage = async (amount: number) => {
         if (!currentUser) return;

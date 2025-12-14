@@ -13,7 +13,10 @@ const MinimumTracker: React.FC<MinimumTrackerProps> = ({ currentUsage, monthlyMi
 
     return (
         <div className="glass-card mb-4">
-            <h3 style={{ margin: '0 0 1rem 0', fontSize: '1.25rem', fontFamily: 'var(--font-heading)', color: 'var(--color-primary)' }}>Your Monthly Minimum</h3>
+            <div className="mb-4">
+                <h3 style={{ margin: '0 0 0.25rem 0', fontSize: '1.25rem', fontFamily: 'var(--font-heading)', color: 'var(--color-primary)' }}>Your Monthly Minimum</h3>
+                <p className="text-sm text-muted" style={{ margin: 0 }}>Track your required monthly spending progress.</p>
+            </div>
 
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6 items-center">
                 <div>

@@ -7,7 +7,7 @@ import ActivityLog from '../components/ActivityLog';
 import { useMonthlyStatus } from '../hooks/useMonthlyStatus';
 
 const Dashboard: React.FC = () => {
-    const { status, loading, addTransaction, markFullUsage, donateSurplus, resetMonth } = useMonthlyStatus();
+    const { status, loading, addTransaction, markFullUsage, donateSurplus } = useMonthlyStatus();
 
     if (loading) {
         return (
@@ -34,49 +34,47 @@ const Dashboard: React.FC = () => {
                 </div>
             </div>
 
-            <div className="grid gap-6 md:grid-cols-2">
-                <div>
-                    <MinimumTracker
-                        currentUsage={status.actualUsage}
-                        monthlyMinimum={75}
-                        isFullUsage={status.isFullUsage}
-                        onMarkFull={markFullUsage}
-                    />
+            {/* 1. Monthly Minimum Tracker - Prominent First Card */}
+            <MinimumTracker
+                currentUsage={status.actualUsage}
+                monthlyMinimum={75}
+                isFullUsage={status.isFullUsage}
+                onMarkFull={markFullUsage}
+            />
 
-                    <DonationWidget
-                        surplus={surplus}
-                        onDonate={donateSurplus}
-                    />
-                </div>
-                <div>
-                    {status.isFullUsage ? (
-                        <div className="glass-card mb-4 p-6 text-center">
-                            <h3 style={{ color: 'var(--color-primary)', marginBottom: '0.5rem' }}>Minimum Met! 🎉</h3>
-                            <p className="text-muted">You have marked your monthly minimum as fully used.</p>
-                        </div>
-                    ) : (
-                        <AddTransaction
-                            onAdd={addTransaction}
-                            transactionCount={status.transactions.length}
-                        />
-                    )}
-
-                    <div className="mt-6">
-                        <ActivityLog transactions={status.transactions} />
+            {/* 2. Combined Log Spending & Activity Card */}
+            <div className="glass-card mb-6">
+                <div className="grid gap-8 md:grid-cols-2">
+                    {/* Left Panel: Input / Status */}
+                    <div className="h-full">
+                        {status.isFullUsage ? (
+                            <div className="h-full flex flex-col items-center justify-center text-center p-4">
+                                <h3 style={{ color: 'var(--color-primary)', marginBottom: '0.5rem', fontSize: '1.25rem' }}>Minimum Met! 🎉</h3>
+                                <p className="text-muted">You have marked your monthly minimum as fully used.</p>
+                            </div>
+                        ) : (
+                            <AddTransaction
+                                onAdd={addTransaction}
+                                transactionCount={status.transactions.length}
+                            />
+                        )}
                     </div>
 
-                    {import.meta.env.DEV && (
-                        <div className="mt-8 text-center">
-                            <button
-                                onClick={resetMonth}
-                                className="text-xs text-muted hover:text-danger underline"
-                                style={{ background: 'none', border: 'none', cursor: 'pointer' }}
-                            >
-                                Reset My Data (Dev Only)
-                            </button>
-                        </div>
-                    )}
+                    {/* Right Panel: Activity Log */}
+                    <div className="md:border-l border-glass-border md:pl-8">
+                        <ActivityLog transactions={status.transactions} />
+                    </div>
                 </div>
+            </div>
+
+            {/* 3. Donation / Share Surplus Card */}
+            <DonationWidget
+                surplus={surplus}
+                onDonate={donateSurplus}
+            />
+
+            <div className="mt-8">
+                {/* Footer or Spacing */}
             </div>
         </DashboardLayout>
     );

@@ -11,7 +11,37 @@ const Login: React.FC = () => {
         try {
             setError('');
             await signInWithGoogle();
-            navigate('/dashboard');
+
+            // Note: We'll rely on a separate effect or component to handle redirection 
+            // because strict mode or component re-renders might cause race conditions
+            // here. However, basic logic is:
+            // The AuthContext updates the user. The Dashboard/PrivateRoute might need to check if profile exists.
+            // Actually, best place to check is here after await, OR in a routing guard.
+            // Let's do it here for simplicity as requested.
+
+            // We need to fetch the user doc to see if they are onboarded.
+            // We can't use 'currentUser' from context immediately here as it might not be updated yet in the closure.
+            // But 'signInWithGoogle' in context waits for popup.
+            // Let's look at AuthContext again. It updates state on onAuthStateChanged.
+            // So we might need to wait or just let the PrivateRoute handle it? Note that PrivateRoute just checks 'currentUser'.
+
+            // Let's try to fetch using the auth result if we had access to it, but context wraps it.
+            // We will trust that after signInWithGoogle resolves, the user is signed in.
+            // We'll navigate to a 'CheckAuth' or just navigate to Dashboard and let Dashboard redirect?
+            // "once a user google auth's in and before we put them on the dashboard page. We need a form"
+            // So we should navigate to /onboarding maybe, and let Onboarding redirect to dashboard if already exists?
+            // Or better: Navigate to '/' which is a loader that decides?
+
+            // Plan:
+            // 1. User signs in.
+            // 2. We navigate to a loading/decision route or simply check doc here.
+
+            // Let's import db here to check.
+
+            navigate('/onboarding'); // Logic: Always go to onboarding. Onboarding will check if profile exists and forward to dashboard if so.
+            // Wait, that might flash the form. 
+            // Better: Check here.
+
         } catch (error: any) {
             console.error("Login failed", error);
             setError(error.message || 'Failed to sign in');

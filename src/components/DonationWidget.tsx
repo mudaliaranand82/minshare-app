@@ -29,7 +29,7 @@ const DonationWidget: React.FC<DonationWidgetProps> = ({ surplus, onDonate }) =>
 
     return (
         <div className="glass-card">
-            <h3 style={{ margin: '0 0 1rem 0', fontSize: '1.25rem', fontFamily: 'var(--font-heading)', color: 'var(--color-primary)' }}>Share Your Surplus</h3>
+            <h3 style={{ margin: '0 0 0.5rem 0', fontSize: '1.25rem', fontFamily: 'var(--font-heading)', color: 'var(--color-primary)' }}>Share your unspent minimum</h3>
             <p className="mb-4 text-muted" style={{ fontSize: '0.95rem' }}>
                 You have <strong>${surplus.toFixed(2)}</strong> available to share.
                 Would you like to donate it?
@@ -41,7 +41,7 @@ const DonationWidget: React.FC<DonationWidgetProps> = ({ surplus, onDonate }) =>
                     className="btn btn-outline flex-1"
                     disabled={loading}
                 >
-                    Tip Staff ☕️
+                    Staff Food 🍔
                 </button>
                 <button
                     onClick={() => handleDonate('charity')}

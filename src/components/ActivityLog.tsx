@@ -18,7 +18,7 @@ const ActivityLog: React.FC<ActivityLogProps> = ({ transactions }) => {
     );
 
     return (
-        <div className="glass-card">
+        <div className="h-full">
             <h3 style={{ margin: '0 0 1rem 0', fontSize: '1.25rem', fontFamily: 'var(--font-heading)', color: 'var(--color-primary)' }}>Activity Log</h3>
 
             {sortedTransactions.length === 0 ? (
