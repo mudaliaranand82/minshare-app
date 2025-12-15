@@ -7,7 +7,7 @@ import ActivityLog from '../components/ActivityLog';
 import { useMonthlyStatus } from '../hooks/useMonthlyStatus';
 
 const Dashboard: React.FC = () => {
-    const { status, loading, addTransaction, markFullUsage, donateSurplus } = useMonthlyStatus();
+    const { status, loading, addTransaction, markFullUsage, donateSurplus, resetMonth } = useMonthlyStatus();
 
     if (loading) {
         return (
@@ -78,9 +78,18 @@ const Dashboard: React.FC = () => {
                 />
             </div>
 
-            <div className="mt-4">
-                {/* Footer spacing */}
-            </div>
+            {/* Dev Tools - Only show in development */}
+            {import.meta.env.DEV && (
+                <div className="mt-8 text-center">
+                    <button
+                        onClick={resetMonth}
+                        className="text-xs text-muted hover:text-danger underline"
+                        style={{ background: 'none', border: 'none', cursor: 'pointer' }}
+                    >
+                        Reset My Data (Dev Only)
+                    </button>
+                </div>
+            )}
         </DashboardLayout>
     );
 };
