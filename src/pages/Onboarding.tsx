@@ -13,6 +13,7 @@ const Onboarding: React.FC = () => {
     const [phone, setPhone] = useState('');
     const [loading, setLoading] = useState(false);
     const [checking, setChecking] = useState(true);
+    const [error, setError] = useState('');
 
     React.useEffect(() => {
         if (currentUser?.displayName) {
@@ -29,14 +30,17 @@ const Onboarding: React.FC = () => {
                 return;
             }
             try {
+                console.log('[Onboarding] Checking profile for user:', currentUser.uid);
                 const docSnap = await getDoc(doc(db, 'users', currentUser.uid));
+                console.log('[Onboarding] Profile check result:', docSnap.exists());
                 if (docSnap.exists()) {
                     navigate('/dashboard', { replace: true });
                 } else {
                     setChecking(false);
                 }
-            } catch (err) {
-                console.error("Error checking profile:", err);
+            } catch (err: any) {
+                console.error("[Onboarding] Error checking profile:", err);
+                setError(`Could not verify profile: ${err.message}`);
                 setChecking(false);
             }
         };
@@ -48,8 +52,13 @@ const Onboarding: React.FC = () => {
         if (!currentUser) return;
 
         setLoading(true);
+        setError('');
+
         try {
-            await setDoc(doc(db, 'users', currentUser.uid), {
+            console.log('[Onboarding] Saving profile...');
+
+            // Add a timeout to prevent infinite hanging
+            const savePromise = setDoc(doc(db, 'users', currentUser.uid), {
                 uid: currentUser.uid,
                 email: currentUser.email,
                 firstName,
@@ -60,10 +69,18 @@ const Onboarding: React.FC = () => {
                 role: 'member',
                 createdAt: new Date().toISOString()
             });
-            navigate('/dashboard');
-        } catch (error) {
-            console.error("Error saving profile", error);
-        } finally {
+
+            const timeoutPromise = new Promise((_, reject) =>
+                setTimeout(() => reject(new Error('Save timed out. Please check your connection.')), 10000)
+            );
+
+            await Promise.race([savePromise, timeoutPromise]);
+
+            console.log('[Onboarding] Profile saved successfully');
+            navigate('/dashboard', { replace: true });
+        } catch (err: any) {
+            console.error("[Onboarding] Error saving profile:", err);
+            setError(`Failed to save: ${err.message}`);
             setLoading(false);
         }
     };
@@ -131,6 +148,19 @@ const Onboarding: React.FC = () => {
                             placeholder="(555) 123-4567"
                         />
                     </div>
+
+                    {error && (
+                        <div style={{
+                            background: 'rgba(239, 68, 68, 0.1)',
+                            border: '1px solid rgba(239, 68, 68, 0.3)',
+                            borderRadius: '0.5rem',
+                            padding: '0.75rem 1rem',
+                            color: '#ef4444',
+                            fontSize: '0.9rem'
+                        }}>
+                            {error}
+                        </div>
+                    )}
 
                     <button type="submit" className="btn btn-primary mt-4" disabled={loading}>
                         {loading ? 'Saving...' : 'Continue to Dashboard'}
