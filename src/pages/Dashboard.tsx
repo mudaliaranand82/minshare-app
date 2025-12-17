@@ -22,38 +22,62 @@ const Dashboard: React.FC = () => {
 
     const surplus = Math.max(75 - status.actualUsage, 0);
     const currentDate = new Date();
-    const monthName = currentDate.toLocaleString('default', { month: 'long' });
     const formattedDate = currentDate.toLocaleDateString('en-US', { weekday: 'long', month: 'short', day: 'numeric' });
+
+    // Hide donation widget if already donated
+    const showDonationWidget = surplus > 0 && !status.donatedAmount;
 
     return (
         <DashboardLayout>
-            {/* Header with better spacing */}
-            <div className="mb-8 flex justify-between items-end">
-                <div>
-                    <h2 style={{ fontSize: '2rem', margin: '0 0 0.5rem 0', color: 'var(--color-primary)', fontFamily: 'var(--font-heading)' }}>{monthName}</h2>
-                    <p style={{ margin: 0, color: 'var(--color-text-muted)', fontSize: '1.1rem' }}>{formattedDate}</p>
-                </div>
+            {/* Compact Header */}
+            <div style={{ marginBottom: '1.5rem' }}>
+                <p style={{ margin: 0, color: 'var(--color-text-muted)', fontSize: '1rem' }}>{formattedDate}</p>
             </div>
 
-            {/* 1. Monthly Minimum Tracker - Prominent First Card */}
-            <div className="mb-8">
+            {/* Card 1: Monthly Minimum Tracker */}
+            <div style={{ marginBottom: '1.5rem' }}>
                 <MinimumTracker
                     currentUsage={status.actualUsage}
                     monthlyMinimum={75}
+                    donatedAmount={status.donatedAmount}
+                    allocationTarget={status.allocationTarget}
                     isFullUsage={status.isFullUsage}
                     onMarkFull={markFullUsage}
                 />
             </div>
 
-            {/* 2. Combined Log Spending & Activity Card */}
-            <div className="glass-card mb-8">
-                <div className="grid gap-8 md:grid-cols-2">
-                    {/* Left Panel: Input / Status */}
-                    <div className="h-full" style={{ minHeight: '200px' }}>
+            {/* Card 2: Log Transactions + Activity Log (Two Equal Columns) */}
+            <div className="glass-card" style={{ marginBottom: '1.5rem' }}>
+                <div className="grid" style={{
+                    gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))',
+                    gap: '1.5rem',
+                    minHeight: '250px'
+                }}>
+                    {/* Left Column: Log Transactions */}
+                    <div style={{
+                        paddingRight: '1rem',
+                        display: 'flex',
+                        flexDirection: 'column'
+                    }}>
                         {status.isFullUsage ? (
-                            <div className="h-full flex flex-col items-center justify-center text-center p-4">
-                                <h3 style={{ color: 'var(--color-primary)', marginBottom: '0.5rem', fontSize: '1.25rem', fontFamily: 'var(--font-heading)' }}>Minimum Met! 🎉</h3>
-                                <p className="text-muted">You have marked your monthly minimum as fully used.</p>
+                            <div style={{
+                                height: '100%',
+                                display: 'flex',
+                                flexDirection: 'column',
+                                alignItems: 'center',
+                                justifyContent: 'center',
+                                textAlign: 'center',
+                                padding: '1rem'
+                            }}>
+                                <h3 style={{
+                                    color: 'var(--color-primary)',
+                                    marginBottom: '0.5rem',
+                                    fontSize: '1.25rem',
+                                    fontFamily: 'var(--font-heading)'
+                                }}>
+                                    Minimum Met! 🎉
+                                </h3>
+                                <p className="text-muted">You've marked your monthly minimum as fully used.</p>
                             </div>
                         ) : (
                             <AddTransaction
@@ -63,28 +87,35 @@ const Dashboard: React.FC = () => {
                         )}
                     </div>
 
-                    {/* Right Panel: Activity Log */}
-                    <div className="md:border-l md:pl-8" style={{ borderColor: 'rgba(61, 103, 53, 0.1)' }}>
+                    {/* Right Column: Activity Log */}
+                    <div style={{
+                        paddingLeft: '1rem',
+                        borderLeft: '1px solid rgba(61, 103, 53, 0.1)',
+                        display: 'flex',
+                        flexDirection: 'column'
+                    }}>
                         <ActivityLog transactions={status.transactions} />
                     </div>
                 </div>
             </div>
 
-            {/* 3. Donation / Share Surplus Card */}
-            <div className="mb-8">
-                <DonationWidget
-                    surplus={surplus}
-                    onDonate={donateSurplus}
-                />
-            </div>
+            {/* Card 3: Donation / Share Surplus (only if not already donated) */}
+            {showDonationWidget && (
+                <div>
+                    <DonationWidget
+                        surplus={surplus}
+                        onDonate={donateSurplus}
+                    />
+                </div>
+            )}
 
             {/* Dev Tools - Only show in development */}
             {import.meta.env.DEV && (
-                <div className="mt-8 text-center">
+                <div style={{ marginTop: '1.5rem', textAlign: 'center' }}>
                     <button
                         onClick={resetMonth}
                         className="text-xs text-muted hover:text-danger underline"
-                        style={{ background: 'none', border: 'none', cursor: 'pointer' }}
+                        style={{ background: 'none', border: 'none', cursor: 'pointer', fontSize: '0.75rem' }}
                     >
                         Reset My Data (Dev Only)
                     </button>

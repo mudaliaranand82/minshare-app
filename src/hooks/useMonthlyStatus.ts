@@ -14,6 +14,7 @@ interface MonthlyStatus {
     plannedUsage: number; // Deprecated but keeping for compatibility if needed, or can remove
     actualUsage: number;
     donatedAmount: number;
+    allocationTarget?: 'staff' | 'charity';
     isFullUsage: boolean;
     transactions: Transaction[];
 }
@@ -103,9 +104,12 @@ export const useMonthlyStatus = () => {
 
     const donateSurplus = async (target: 'staff' | 'charity') => {
         if (!currentUser) return;
+        const surplus = Math.max(75 - status.actualUsage, 0);
         const docRef = doc(db, 'monthly_status', `${currentUser.uid}_${currentMonth}`);
         await updateDoc(docRef, {
-            allocationTarget: target
+            allocationTarget: target,
+            donatedAmount: surplus,
+            isFullUsage: true // Mark as complete since they've allocated everything
         });
     };
 

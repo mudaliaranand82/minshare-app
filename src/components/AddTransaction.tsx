@@ -34,9 +34,9 @@ const AddTransaction: React.FC<AddTransactionProps> = ({ onAdd, transactionCount
     };
 
     return (
-        <div className="h-full">
-            <h2 style={{ fontSize: '1.25rem', marginBottom: '1rem', fontFamily: 'var(--font-heading)', color: 'var(--color-primary)' }}>Log Transactions</h2>
-            <form onSubmit={handleSubmit} className="flex flex-col gap-4">
+        <div style={{ height: '100%', display: 'flex', flexDirection: 'column' }}>
+            <h3 style={{ margin: '0 0 1rem 0', fontSize: '1.25rem', fontFamily: 'var(--font-heading)', color: 'var(--color-primary)' }}>Log Transactions</h3>
+            <form onSubmit={handleSubmit} className="flex flex-col gap-4" style={{ flex: 1 }}>
                 <div>
                     <label style={{ display: 'block', marginBottom: '0.5rem', fontSize: '0.875rem', fontWeight: 500 }}>Amount ($)</label>
                     <input

@@ -6,6 +6,8 @@
   --color-secondary: #8fbc8f;
   --color-accent: #d4af37;
   /* Classic Gold */
+  --color-accent-teal: #A9DCE3;
+  /* Soft Teal Accent */
   --color-danger: #ef4444;
 
   --color-bg-main: #F1F1F1;
@@ -452,5 +454,75 @@ input:focus {
 
   .glass-card:hover {
     transform: none !important;
+  }
+}
+
+/* Mobile Responsive Styles */
+@media (max-width: 768px) {
+
+  /* Reduce card padding on mobile */
+  .glass-card {
+    padding: 1.25rem;
+  }
+
+  /* Stack grids on mobile */
+  .grid {
+    display: block !important;
+  }
+
+  .grid>*+* {
+    margin-top: 1rem;
+  }
+
+  /* Smaller headings on mobile */
+  h1 {
+    font-size: 1.5rem !important;
+  }
+
+  h2 {
+    font-size: 1.35rem !important;
+  }
+
+  h3 {
+    font-size: 1.1rem !important;
+  }
+
+  /* Reduce container padding */
+  .container {
+    padding: 0 1rem !important;
+  }
+
+  /* Better button sizing for touch */
+  .btn {
+    min-height: 44px;
+    padding: 0.75rem 1.25rem;
+  }
+
+  /* Make inputs larger for touch */
+  input,
+  select,
+  textarea {
+    min-height: 48px;
+    font-size: 16px !important;
+    /* Prevents iOS zoom */
+  }
+
+  /* Tables: horizontal scroll */
+  table {
+    display: block;
+    overflow-x: auto;
+    white-space: nowrap;
+  }
+
+  /* Utility: hide on mobile */
+  .hide-mobile {
+    display: none !important;
+  }
+}
+
+/* Tablet and small desktop adjustments */
+@media (max-width: 1024px) and (min-width: 769px) {
+  .container {
+    max-width: 900px;
   }
 }

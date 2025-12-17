@@ -1,7 +1,10 @@
 import React, { useEffect, useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import DashboardLayout from '../components/DashboardLayout';
-import { collection, getDocs, query, where } from 'firebase/firestore';
+import { collection, getDocs, query, where, doc, getDoc } from 'firebase/firestore';
 import { db } from '../firebase';
+import { useAuth } from '../context/AuthContext';
+import { isAdminEmail } from '../config/admins';
 
 interface MemberStatus {
     uid: string;
@@ -11,9 +14,30 @@ interface MemberStatus {
     donatedAmount: number;
 }
 
+interface UserProfile {
+    firstName: string;
+    lastName: string;
+    displayName: string;
+    phoneNumber: string;
+    memberId: string;
+}
+
+interface MemberWithProfile extends MemberStatus {
+    profile?: UserProfile;
+}
+
 const AdminDashboard: React.FC = () => {
-    const [members, setMembers] = useState<MemberStatus[]>([]);
+    const { currentUser } = useAuth();
+    const navigate = useNavigate();
+    const [members, setMembers] = useState<MemberWithProfile[]>([]);
     const [loading, setLoading] = useState(true);
+
+    // Check admin access
+    useEffect(() => {
+        if (currentUser && !isAdminEmail(currentUser.email)) {
+            navigate('/dashboard', { replace: true });
+        }
+    }, [currentUser, navigate]);
 
     useEffect(() => {
         const fetchData = async () => {
@@ -21,11 +45,29 @@ const AdminDashboard: React.FC = () => {
             const q = query(collection(db, 'monthly_status'), where('month', '==', currentMonth));
             const querySnapshot = await getDocs(q);
 
-            const data: MemberStatus[] = [];
-            querySnapshot.forEach((doc) => {
-                data.push(doc.data() as MemberStatus);
+            const membersData: MemberWithProfile[] = [];
+
+            // Fetch monthly status data
+            querySnapshot.forEach((docSnap) => {
+                membersData.push(docSnap.data() as MemberWithProfile);
             });
-            setMembers(data);
+
+            // Fetch user profiles for each member
+            const membersWithProfiles = await Promise.all(
+                membersData.map(async (member) => {
+                    try {
+                        const userDoc = await getDoc(doc(db, 'users', member.uid));
+                        if (userDoc.exists()) {
+                            return { ...member, profile: userDoc.data() as UserProfile };
+                        }
+                    } catch (err) {
+                        console.error(`Error fetching profile for ${member.uid}:`, err);
+                    }
+                    return member;
+                })
+            );
+
+            setMembers(membersWithProfiles);
             setLoading(false);
         };
 
@@ -47,69 +89,346 @@ const AdminDashboard: React.FC = () => {
         .filter(m => m.allocationTarget === 'charity')
         .reduce((acc, curr) => acc + (curr.donatedAmount || 0), 0);
 
+    const currentDate = new Date();
+    const monthName = currentDate.toLocaleString('default', { month: 'long', year: 'numeric' });
+
     if (loading) {
-        return <DashboardLayout>Loading Admin Data...</DashboardLayout>;
+        return (
+            <DashboardLayout>
+                <div className="flex justify-center items-center h-64 flex-col gap-4">
+                    <div className="text-xl font-bold text-primary">Loading Admin Data...</div>
+                    <p className="text-muted">Fetching member statistics...</p>
+                </div>
+            </DashboardLayout>
+        );
     }
 
     return (
         <DashboardLayout>
-            <div className="mb-6">
-                <h2 style={{ fontSize: '2rem', margin: 0, color: 'var(--color-primary)', fontFamily: 'var(--font-heading)' }}>Admin Overview</h2>
-                <p style={{ margin: 0, color: 'var(--color-text-muted)', fontSize: '1rem' }}>Manage club minimums and distributions.</p>
+            {/* Header */}
+            <div style={{ marginBottom: '1.5rem' }}>
+                <h2 style={{
+                    fontSize: '1.75rem',
+                    margin: '0 0 0.25rem 0',
+                    color: 'var(--color-primary)',
+                    fontFamily: 'var(--font-heading)'
+                }}>
+                    Admin Overview
+                </h2>
+                <p style={{ margin: 0, color: 'var(--color-text-muted)', fontSize: '1rem' }}>
+                    {monthName} • Manage club minimums and distributions
+                </p>
             </div>
 
-            <div className="grid gap-6 md:grid-cols-3 mb-8">
-                <div className="glass-card p-6">
-                    <h3 className="text-sm uppercase tracking-wider text-muted mb-2 font-bold">Total Pool</h3>
-                    <p className="text-3xl font-bold text-primary" style={{ fontFamily: 'var(--font-heading)' }}>${totalPool.toFixed(2)}</p>
-                </div>
-                <div className="glass-card p-6 relative overflow-hidden">
-                    <div className="absolute top-0 right-0 p-4 opacity-10">
-                        <span style={{ fontSize: '3rem' }}>☕️</span>
+            {/* Stats Cards Row */}
+            <div className="grid" style={{
+                gridTemplateColumns: 'repeat(auto-fit, minmax(250px, 1fr))',
+                gap: '1rem',
+                marginBottom: '1.5rem'
+            }}>
+                {/* Total Pool Card */}
+                <div className="glass-card" style={{ padding: '1.5rem' }}>
+                    <div style={{
+                        display: 'flex',
+                        alignItems: 'center',
+                        gap: '0.75rem',
+                        marginBottom: '1rem'
+                    }}>
+                        <div style={{
+                            width: '40px',
+                            height: '40px',
+                            borderRadius: '50%',
+                            background: 'rgba(169, 220, 227, 0.3)',
+                            display: 'flex',
+                            alignItems: 'center',
+                            justifyContent: 'center',
+                            fontSize: '1.25rem'
+                        }}>
+                            💰
+                        </div>
+                        <span style={{
+                            fontSize: '0.85rem',
+                            fontWeight: 600,
+                            color: 'var(--color-text-muted)',
+                            textTransform: 'uppercase',
+                            letterSpacing: '0.05em'
+                        }}>
+                            Total Pool
+                        </span>
                     </div>
-                    <h3 className="text-sm uppercase tracking-wider text-muted mb-2 font-bold">Staff Tips</h3>
-                    <p className="text-3xl font-bold text-primary mb-4" style={{ fontFamily: 'var(--font-heading)' }}>${staffPool.toFixed(2)}</p>
-                    <button className="btn btn-primary btn-sm w-full" onClick={() => alert('Funds distributed to Staff!')}>Distribute Funds</button>
+                    <p style={{
+                        fontSize: '2.25rem',
+                        fontWeight: 700,
+                        margin: 0,
+                        color: 'var(--color-primary)',
+                        fontFamily: 'var(--font-heading)'
+                    }}>
+                        ${totalPool.toFixed(2)}
+                    </p>
+                    <p style={{
+                        margin: '0.5rem 0 0 0',
+                        fontSize: '0.85rem',
+                        color: 'var(--color-text-muted)'
+                    }}>
+                        from {members.filter(m => m.allocationTarget).length} members
+                    </p>
                 </div>
-                <div className="glass-card p-6 relative overflow-hidden">
-                    <div className="absolute top-0 right-0 p-4 opacity-10">
-                        <span style={{ fontSize: '3rem' }}>🎗️</span>
+
+                {/* Staff Tips Card */}
+                <div className="glass-card" style={{ padding: '1.5rem' }}>
+                    <div style={{
+                        display: 'flex',
+                        alignItems: 'center',
+                        gap: '0.75rem',
+                        marginBottom: '1rem'
+                    }}>
+                        <div style={{
+                            width: '40px',
+                            height: '40px',
+                            borderRadius: '50%',
+                            background: 'rgba(61, 103, 53, 0.15)',
+                            display: 'flex',
+                            alignItems: 'center',
+                            justifyContent: 'center',
+                            fontSize: '1.25rem'
+                        }}>
+                            🍔
+                        </div>
+                        <span style={{
+                            fontSize: '0.85rem',
+                            fontWeight: 600,
+                            color: 'var(--color-text-muted)',
+                            textTransform: 'uppercase',
+                            letterSpacing: '0.05em'
+                        }}>
+                            Staff Tips
+                        </span>
                     </div>
-                    <h3 className="text-sm uppercase tracking-wider text-muted mb-2 font-bold">Charity Fund</h3>
-                    <p className="text-3xl font-bold text-primary mb-4" style={{ fontFamily: 'var(--font-heading)' }}>${charityPool.toFixed(2)}</p>
-                    <button className="btn btn-outline btn-sm w-full" onClick={() => alert('Funds sent to Charity!')}>Donate Funds</button>
+                    <p style={{
+                        fontSize: '2.25rem',
+                        fontWeight: 700,
+                        margin: 0,
+                        color: 'var(--color-primary)',
+                        fontFamily: 'var(--font-heading)'
+                    }}>
+                        ${staffPool.toFixed(2)}
+                    </p>
+                    <button
+                        className="btn btn-primary"
+                        onClick={() => alert('Funds distributed to Staff!')}
+                        style={{
+                            marginTop: '1rem',
+                            width: '100%',
+                            padding: '0.6rem 1rem',
+                            fontSize: '0.85rem'
+                        }}
+                    >
+                        Distribute Funds
+                    </button>
+                </div>
+
+                {/* Charity Fund Card */}
+                <div className="glass-card" style={{ padding: '1.5rem' }}>
+                    <div style={{
+                        display: 'flex',
+                        alignItems: 'center',
+                        gap: '0.75rem',
+                        marginBottom: '1rem'
+                    }}>
+                        <div style={{
+                            width: '40px',
+                            height: '40px',
+                            borderRadius: '50%',
+                            background: 'rgba(212, 175, 55, 0.15)',
+                            display: 'flex',
+                            alignItems: 'center',
+                            justifyContent: 'center',
+                            fontSize: '1.25rem'
+                        }}>
+                            🎗️
+                        </div>
+                        <span style={{
+                            fontSize: '0.85rem',
+                            fontWeight: 600,
+                            color: 'var(--color-text-muted)',
+                            textTransform: 'uppercase',
+                            letterSpacing: '0.05em'
+                        }}>
+                            Charity Fund
+                        </span>
+                    </div>
+                    <p style={{
+                        fontSize: '2.25rem',
+                        fontWeight: 700,
+                        margin: 0,
+                        color: 'var(--color-primary)',
+                        fontFamily: 'var(--font-heading)'
+                    }}>
+                        ${charityPool.toFixed(2)}
+                    </p>
+                    <button
+                        className="btn btn-outline"
+                        onClick={() => alert('Funds sent to Charity!')}
+                        style={{
+                            marginTop: '1rem',
+                            width: '100%',
+                            padding: '0.6rem 1rem',
+                            fontSize: '0.85rem'
+                        }}
+                    >
+                        Donate Funds
+                    </button>
                 </div>
             </div>
 
+            {/* Member Table Card */}
             <div className="glass-card">
-                <h3 style={{ margin: '0 0 1.5rem 0', fontSize: '1.25rem', fontFamily: 'var(--font-heading)', color: 'var(--color-primary)' }}>Member Statuses</h3>
-                <div className="overflow-x-auto">
+                <h3 style={{
+                    margin: '0 0 1.25rem 0',
+                    fontSize: '1.25rem',
+                    fontFamily: 'var(--font-heading)',
+                    color: 'var(--color-primary)'
+                }}>
+                    Member Activity
+                </h3>
+
+                <div style={{ overflowX: 'auto' }}>
                     <table style={{ width: '100%', borderCollapse: 'collapse' }}>
                         <thead>
-                            <tr style={{ borderBottom: '1px solid var(--glass-border)', textAlign: 'left' }}>
-                                <th className="p-3 text-sm font-semibold text-muted">User ID</th>
-                                <th className="p-3 text-sm font-semibold text-muted">Spent</th>
-                                <th className="p-3 text-sm font-semibold text-muted">Donation</th>
-                                <th className="p-3 text-sm font-semibold text-muted">Target</th>
+                            <tr style={{ borderBottom: '2px solid rgba(61, 103, 53, 0.1)' }}>
+                                <th style={{
+                                    padding: '0.75rem 1rem',
+                                    textAlign: 'left',
+                                    fontSize: '0.8rem',
+                                    fontWeight: 600,
+                                    color: 'var(--color-text-muted)',
+                                    textTransform: 'uppercase',
+                                    letterSpacing: '0.05em'
+                                }}>Member</th>
+                                <th style={{
+                                    padding: '0.75rem 1rem',
+                                    textAlign: 'left',
+                                    fontSize: '0.8rem',
+                                    fontWeight: 600,
+                                    color: 'var(--color-text-muted)',
+                                    textTransform: 'uppercase',
+                                    letterSpacing: '0.05em'
+                                }}>Phone</th>
+                                <th style={{
+                                    padding: '0.75rem 1rem',
+                                    textAlign: 'right',
+                                    fontSize: '0.8rem',
+                                    fontWeight: 600,
+                                    color: 'var(--color-text-muted)',
+                                    textTransform: 'uppercase',
+                                    letterSpacing: '0.05em'
+                                }}>Spent</th>
+                                <th style={{
+                                    padding: '0.75rem 1rem',
+                                    textAlign: 'right',
+                                    fontSize: '0.8rem',
+                                    fontWeight: 600,
+                                    color: 'var(--color-text-muted)',
+                                    textTransform: 'uppercase',
+                                    letterSpacing: '0.05em'
+                                }}>Shared</th>
+                                <th style={{
+                                    padding: '0.75rem 1rem',
+                                    textAlign: 'center',
+                                    fontSize: '0.8rem',
+                                    fontWeight: 600,
+                                    color: 'var(--color-text-muted)',
+                                    textTransform: 'uppercase',
+                                    letterSpacing: '0.05em'
+                                }}>Allocation</th>
                             </tr>
                         </thead>
                         <tbody>
-                            {members.map((member) => (
-                                <tr key={member.uid} style={{ borderBottom: '1px solid rgba(0,0,0,0.05)' }}>
-                                    <td className="p-3 font-mono text-xs text-muted">{member.uid.slice(0, 8)}...</td>
-                                    <td className="p-3 font-medium">${member.actualUsage.toFixed(2)}</td>
-                                    <td className="p-3 font-bold text-primary">
-                                        {member.allocationTarget ? `$${member.donatedAmount.toFixed(2)}` : '-'}
+                            {members.map((member, index) => (
+                                <tr
+                                    key={member.uid}
+                                    style={{
+                                        borderBottom: index < members.length - 1 ? '1px solid rgba(0,0,0,0.05)' : 'none',
+                                        transition: 'background 0.15s'
+                                    }}
+                                >
+                                    <td style={{
+                                        padding: '1rem',
+                                        fontSize: '0.95rem'
+                                    }}>
+                                        <div style={{ fontWeight: 500 }}>
+                                            {member.profile?.displayName || member.profile?.firstName
+                                                ? `${member.profile.firstName} ${member.profile.lastName}`.trim()
+                                                : '—'}
+                                        </div>
+                                        {member.profile?.memberId && (
+                                            <div style={{
+                                                fontSize: '0.75rem',
+                                                color: 'var(--color-text-muted)',
+                                                marginTop: '0.25rem'
+                                            }}>
+                                                ID: {member.profile.memberId}
+                                            </div>
+                                        )}
                                     </td>
-                                    <td className="p-3">
+                                    <td style={{
+                                        padding: '1rem',
+                                        fontSize: '0.9rem',
+                                        color: 'var(--color-text-muted)'
+                                    }}>
+                                        {member.profile?.phoneNumber || '—'}
+                                    </td>
+                                    <td style={{
+                                        padding: '1rem',
+                                        textAlign: 'right',
+                                        fontWeight: 500,
+                                        fontSize: '0.95rem'
+                                    }}>
+                                        ${member.actualUsage.toFixed(2)}
+                                    </td>
+                                    <td style={{
+                                        padding: '1rem',
+                                        textAlign: 'right',
+                                        fontWeight: 600,
+                                        color: 'var(--color-primary)',
+                                        fontSize: '0.95rem'
+                                    }}>
+                                        {member.allocationTarget ? `$${member.donatedAmount.toFixed(2)}` : '—'}
+                                    </td>
+                                    <td style={{
+                                        padding: '1rem',
+                                        textAlign: 'center'
+                                    }}>
                                         {member.allocationTarget === 'staff' && (
-                                            <span className="badge" style={{ background: 'rgba(61, 103, 53, 0.1)', color: 'var(--color-primary)', padding: '0.25rem 0.75rem', borderRadius: '1rem', fontSize: '0.75rem' }}>
-                                                Staff Tip
+                                            <span style={{
+                                                background: 'rgba(61, 103, 53, 0.1)',
+                                                color: 'var(--color-primary)',
+                                                padding: '0.35rem 0.85rem',
+                                                borderRadius: '2rem',
+                                                fontSize: '0.75rem',
+                                                fontWeight: 600
+                                            }}>
+                                                🍔 Staff
                                             </span>
                                         )}
                                         {member.allocationTarget === 'charity' && (
-                                            <span className="badge" style={{ background: 'rgba(212, 175, 55, 0.1)', color: 'var(--color-accent)', padding: '0.25rem 0.75rem', borderRadius: '1rem', fontSize: '0.75rem' }}>
-                                                Charity
+                                            <span style={{
+                                                background: 'rgba(212, 175, 55, 0.1)',
+                                                color: '#b8860b',
+                                                padding: '0.35rem 0.85rem',
+                                                borderRadius: '2rem',
+                                                fontSize: '0.75rem',
+                                                fontWeight: 600
+                                            }}>
+                                                🎗️ Charity
+                                            </span>
+                                        )}
+                                        {!member.allocationTarget && (
+                                            <span style={{
+                                                color: 'var(--color-text-muted)',
+                                                fontSize: '0.8rem'
+                                            }}>
+                                                Pending
                                             </span>
                                         )}
                                     </td>
@@ -117,14 +436,23 @@ const AdminDashboard: React.FC = () => {
                             ))}
                             {members.length === 0 && (
                                 <tr>
-                                    <td colSpan={5} className="p-6 text-center text-muted">No member data found for this month.</td>
+                                    <td
+                                        colSpan={5}
+                                        style={{
+                                            padding: '3rem 1rem',
+                                            textAlign: 'center',
+                                            color: 'var(--color-text-muted)'
+                                        }}
+                                    >
+                                        No member data found for this month.
+                                    </td>
                                 </tr>
                             )}
                         </tbody>
                     </table>
                 </div>
             </div>
-        </DashboardLayout >
+        </DashboardLayout>
     );
 };
 

@@ -2,6 +2,7 @@ import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-d
 import { AuthProvider } from './context/AuthContext';
 import Login from './pages/Login';
 import Onboarding from './pages/Onboarding';
+import Profile from './pages/Profile';
 import Dashboard from './pages/Dashboard';
 import AdminDashboard from './pages/AdminDashboard';
 import { PrivateRoute } from './components/PrivateRoute';
@@ -15,6 +16,11 @@ function App() {
           <Route path="/onboarding" element={
             <PrivateRoute>
               <Onboarding />
+            </PrivateRoute>
+          } />
+          <Route path="/profile" element={
+            <PrivateRoute>
+              <Profile />
             </PrivateRoute>
           } />
           <Route path="/dashboard" element={
