@@ -56,6 +56,7 @@ const Dashboard: React.FC = () => {
                     {/* Left Column: Log Transactions */}
                     <div style={{
                         paddingRight: '1rem',
+                        paddingBottom: '0.5rem',
                         display: 'flex',
                         flexDirection: 'column'
                     }}>
@@ -90,6 +91,7 @@ const Dashboard: React.FC = () => {
                     {/* Right Column: Activity Log */}
                     <div style={{
                         paddingLeft: '1rem',
+                        paddingTop: '0.5rem',
                         borderLeft: '1px solid rgba(61, 103, 53, 0.1)',
                         display: 'flex',
                         flexDirection: 'column'

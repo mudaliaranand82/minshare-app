@@ -20,7 +20,7 @@ const ActivityLog: React.FC<ActivityLogProps> = ({ transactions }) => {
     return (
         <div style={{ height: '100%', display: 'flex', flexDirection: 'column' }}>
             <h3 style={{
-                margin: '0 0 1rem 0',
+                margin: '0 0 1.25rem 0',
                 fontSize: '1.25rem',
                 fontFamily: 'var(--font-heading)',
                 color: 'var(--color-primary)'

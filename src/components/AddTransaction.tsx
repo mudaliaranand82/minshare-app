@@ -63,13 +63,14 @@ const AddTransaction: React.FC<AddTransactionProps> = ({ onAdd, transactionCount
                 </div>
                 <button
                     type="submit"
-                    className="btn btn-primary w-full flex items-center justify-center mt-2"
+                    className="btn btn-primary w-full flex items-center justify-center"
                     disabled={loading}
                     style={{
                         height: '3rem',
                         borderRadius: '1.5rem',
                         fontSize: '1rem',
-                        fontWeight: 600
+                        fontWeight: 600,
+                        marginTop: '0.75rem'
                     }}
                 >
                     {loading ? (
