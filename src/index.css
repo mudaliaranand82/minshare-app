@@ -526,3 +526,33 @@ input:focus {
     max-width: 900px;
   }
 }
+
+/* Small phone adjustments */
+@media (max-width: 400px) {
+  .glass-card {
+    padding: 1rem !important;
+  }
+
+  .btn {
+    padding: 0.6rem 1rem;
+    font-size: 0.85rem !important;
+  }
+
+  h2 {
+    font-size: 1.25rem !important;
+  }
+}
+
+/* iOS Safari fixes */
+@supports (-webkit-touch-callout: none) {
+  .btn {
+    -webkit-appearance: none;
+    appearance: none;
+    max-width: 100%;
+    box-sizing: border-box;
+  }
+
+  .glass-card {
+    -webkit-overflow-scrolling: touch;
+  }
+}

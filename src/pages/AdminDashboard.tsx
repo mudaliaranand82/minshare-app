@@ -115,19 +115,19 @@ const AdminDashboard: React.FC = () => {
                 }}>
                     Admin Overview
                 </h2>
-                <p style={{ margin: 0, color: 'var(--color-text-muted)', fontSize: '1rem' }}>
-                    {monthName} • Manage club minimums and distributions
+                <p style={{ margin: 0, color: 'var(--color-text-muted)', fontSize: '0.9rem' }}>
+                    {monthName}
                 </p>
             </div>
 
             {/* Stats Cards Row */}
             <div className="grid" style={{
-                gridTemplateColumns: 'repeat(auto-fit, minmax(250px, 1fr))',
+                gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))',
                 gap: '1rem',
                 marginBottom: '1.5rem'
             }}>
                 {/* Total Pool Card */}
-                <div className="glass-card" style={{ padding: '1.5rem' }}>
+                <div className="glass-card" style={{ padding: '1.25rem', overflow: 'hidden' }}>
                     <div style={{
                         display: 'flex',
                         alignItems: 'center',
@@ -175,7 +175,7 @@ const AdminDashboard: React.FC = () => {
                 </div>
 
                 {/* Staff Tips Card */}
-                <div className="glass-card" style={{ padding: '1.5rem' }}>
+                <div className="glass-card" style={{ padding: '1.25rem', overflow: 'hidden' }}>
                     <div style={{
                         display: 'flex',
                         alignItems: 'center',
@@ -228,7 +228,7 @@ const AdminDashboard: React.FC = () => {
                 </div>
 
                 {/* Charity Fund Card */}
-                <div className="glass-card" style={{ padding: '1.5rem' }}>
+                <div className="glass-card" style={{ padding: '1.25rem', overflow: 'hidden' }}>
                     <div style={{
                         display: 'flex',
                         alignItems: 'center',
