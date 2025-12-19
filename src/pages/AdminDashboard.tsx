@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import DashboardLayout from '../components/DashboardLayout';
-import { collection, getDocs, query, where, doc, getDoc } from 'firebase/firestore';
+import { collection, getDocs, query, where, doc, getDoc, deleteDoc } from 'firebase/firestore';
 import { db } from '../firebase';
 import { useAuth } from '../context/AuthContext';
 import { isAdminEmail } from '../config/admins';
@@ -90,7 +90,30 @@ const AdminDashboard: React.FC = () => {
         .reduce((acc, curr) => acc + (curr.donatedAmount || 0), 0);
 
     const currentDate = new Date();
+    const currentMonth = currentDate.toISOString().slice(0, 7);
     const monthName = currentDate.toLocaleString('default', { month: 'long', year: 'numeric' });
+
+    // Reset a member's monthly status
+    const handleResetMember = async (uid: string, memberName: string) => {
+        const confirmed = window.confirm(
+            `Are you sure you want to reset ${memberName || 'this member'}?\n\nThis will:\n• Clear all their transactions\n• Reset their spending to $0\n• Remove any donations\n\nThis cannot be undone.`
+        );
+
+        if (!confirmed) return;
+
+        try {
+            // Delete the monthly_status document
+            await deleteDoc(doc(db, 'monthly_status', `${uid}_${currentMonth}`));
+
+            // Remove from local state
+            setMembers(prev => prev.filter(m => m.uid !== uid));
+
+            alert(`${memberName || 'Member'} has been reset successfully.`);
+        } catch (err) {
+            console.error('Error resetting member:', err);
+            alert('Failed to reset member. Please try again.');
+        }
+    };
 
     if (loading) {
         return (
@@ -341,6 +364,15 @@ const AdminDashboard: React.FC = () => {
                                     textTransform: 'uppercase',
                                     letterSpacing: '0.05em'
                                 }}>Allocation</th>
+                                <th style={{
+                                    padding: '0.75rem 1rem',
+                                    textAlign: 'center',
+                                    fontSize: '0.8rem',
+                                    fontWeight: 600,
+                                    color: 'var(--color-text-muted)',
+                                    textTransform: 'uppercase',
+                                    letterSpacing: '0.05em'
+                                }}>Actions</th>
                             </tr>
                         </thead>
                         <tbody>
@@ -432,12 +464,37 @@ const AdminDashboard: React.FC = () => {
                                             </span>
                                         )}
                                     </td>
+                                    <td style={{
+                                        padding: '1rem',
+                                        textAlign: 'center'
+                                    }}>
+                                        <button
+                                            onClick={() => handleResetMember(
+                                                member.uid,
+                                                member.profile?.displayName ||
+                                                (member.profile?.firstName ? `${member.profile.firstName} ${member.profile.lastName}`.trim() : '')
+                                            )}
+                                            style={{
+                                                background: 'rgba(239, 68, 68, 0.1)',
+                                                color: '#dc2626',
+                                                border: '1px solid rgba(239, 68, 68, 0.2)',
+                                                padding: '0.35rem 0.75rem',
+                                                borderRadius: '0.5rem',
+                                                fontSize: '0.75rem',
+                                                fontWeight: 500,
+                                                cursor: 'pointer',
+                                                transition: 'all 0.2s'
+                                            }}
+                                        >
+                                            Reset
+                                        </button>
+                                    </td>
                                 </tr>
                             ))}
                             {members.length === 0 && (
                                 <tr>
                                     <td
-                                        colSpan={5}
+                                        colSpan={6}
                                         style={{
                                             padding: '3rem 1rem',
                                             textAlign: 'center',
