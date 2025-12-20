@@ -129,6 +129,28 @@ const Login: React.FC = () => {
                             )}
                         </button>
 
+                        <Link
+                            to="/demo"
+                            className="btn"
+                            style={{
+                                width: '100%',
+                                background: 'var(--color-accent-teal)',
+                                color: 'var(--color-primary)',
+                                display: 'flex',
+                                alignItems: 'center',
+                                justifyContent: 'center',
+                                gap: '0.5rem',
+                                marginTop: '0.75rem',
+                                padding: '0.875rem 1rem',
+                                borderRadius: '0.75rem',
+                                fontWeight: 600,
+                                textDecoration: 'none',
+                                border: 'none'
+                            }}
+                        >
+                            🧪 Test Drive the App
+                        </Link>
+
                         {error && <p className="error-message">{error}</p>}
 
                         <div className="text-center mt-4">
