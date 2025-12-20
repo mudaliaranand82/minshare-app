@@ -1,5 +1,5 @@
 import React from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, Link } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import { doc, getDoc } from 'firebase/firestore';
 import { db } from '../firebase';
@@ -133,7 +133,7 @@ const Login: React.FC = () => {
 
                         <div className="text-center mt-4">
                             <p className="text-sm text-muted">
-                                Don't have an account? <span className="link-primary">Contact Admin</span>
+                                Don't have an account? <Link to="/contact" className="link-primary" style={{ cursor: 'pointer' }}>Contact Admin</Link>
                             </p>
                         </div>
                     </div>
