@@ -48,18 +48,13 @@ const Dashboard: React.FC = () => {
 
             {/* Card 2: Log Transactions + Activity Log (Two Equal Columns) */}
             <div className="glass-card" style={{ marginBottom: '1.5rem' }}>
-                <div className="grid" style={{
+                <div style={{
+                    display: 'grid',
                     gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))',
-                    gap: '1.5rem',
-                    minHeight: '250px'
+                    gap: '1.5rem'
                 }}>
                     {/* Left Column: Log Transactions */}
-                    <div style={{
-                        paddingRight: '1rem',
-                        paddingBottom: '0.5rem',
-                        display: 'flex',
-                        flexDirection: 'column'
-                    }}>
+                    <div>
                         {status.isFullUsage ? (
                             <div style={{
                                 height: '100%',
@@ -90,11 +85,8 @@ const Dashboard: React.FC = () => {
 
                     {/* Right Column: Activity Log */}
                     <div style={{
-                        paddingLeft: '1rem',
-                        paddingTop: '0.5rem',
                         borderLeft: '1px solid rgba(61, 103, 53, 0.1)',
-                        display: 'flex',
-                        flexDirection: 'column'
+                        paddingLeft: '1.5rem'
                     }}>
                         <ActivityLog transactions={status.transactions} />
                     </div>
