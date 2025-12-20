@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import DashboardLayout from '../components/DashboardLayout';
-import { collection, getDocs, query, where, doc, getDoc, deleteDoc, orderBy } from 'firebase/firestore';
+import { collection, getDocs, query, where, doc, getDoc, deleteDoc } from 'firebase/firestore';
 import { db } from '../firebase';
 import { useAuth } from '../context/AuthContext';
 import { isAdminEmail } from '../config/admins';
@@ -80,17 +80,24 @@ const AdminDashboard: React.FC = () => {
 
             setMembers(membersWithProfiles);
 
-            // Fetch contact requests
-            const contactQuery = query(
-                collection(db, 'contact_requests'),
-                orderBy('createdAt', 'desc')
-            );
-            const contactSnapshot = await getDocs(contactQuery);
-            const contactData: ContactRequest[] = [];
-            contactSnapshot.forEach((docSnap) => {
-                contactData.push({ id: docSnap.id, ...docSnap.data() } as ContactRequest);
-            });
-            setContactRequests(contactData);
+            // Fetch contact requests (wrapped in try/catch so it doesn't block the page)
+            try {
+                const contactSnapshot = await getDocs(collection(db, 'contact_requests'));
+                const contactData: ContactRequest[] = [];
+                contactSnapshot.forEach((docSnap) => {
+                    contactData.push({ id: docSnap.id, ...docSnap.data() } as ContactRequest);
+                });
+                // Sort by createdAt client-side (avoids needing Firestore index)
+                contactData.sort((a, b) => {
+                    const timeA = a.createdAt?.toMillis?.() || 0;
+                    const timeB = b.createdAt?.toMillis?.() || 0;
+                    return timeB - timeA;
+                });
+                setContactRequests(contactData);
+            } catch (contactErr) {
+                console.error('Error fetching contact requests:', contactErr);
+                // Don't block the page if contact requests fail
+            }
 
             setLoading(false);
         };
