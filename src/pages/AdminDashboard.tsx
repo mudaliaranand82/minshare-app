@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import DashboardLayout from '../components/DashboardLayout';
-import { collection, getDocs, query, where, doc, getDoc, deleteDoc } from 'firebase/firestore';
+import { collection, getDocs, query, where, doc, getDoc, deleteDoc, orderBy } from 'firebase/firestore';
 import { db } from '../firebase';
 import { useAuth } from '../context/AuthContext';
 import { isAdminEmail } from '../config/admins';
@@ -26,10 +26,21 @@ interface MemberWithProfile extends MemberStatus {
     profile?: UserProfile;
 }
 
+interface ContactRequest {
+    id: string;
+    name: string;
+    email: string;
+    phone?: string;
+    message: string;
+    createdAt: any;
+    status: string;
+}
+
 const AdminDashboard: React.FC = () => {
     const { currentUser } = useAuth();
     const navigate = useNavigate();
     const [members, setMembers] = useState<MemberWithProfile[]>([]);
+    const [contactRequests, setContactRequests] = useState<ContactRequest[]>([]);
     const [loading, setLoading] = useState(true);
 
     // Check admin access
@@ -68,6 +79,19 @@ const AdminDashboard: React.FC = () => {
             );
 
             setMembers(membersWithProfiles);
+
+            // Fetch contact requests
+            const contactQuery = query(
+                collection(db, 'contact_requests'),
+                orderBy('createdAt', 'desc')
+            );
+            const contactSnapshot = await getDocs(contactQuery);
+            const contactData: ContactRequest[] = [];
+            contactSnapshot.forEach((docSnap) => {
+                contactData.push({ id: docSnap.id, ...docSnap.data() } as ContactRequest);
+            });
+            setContactRequests(contactData);
+
             setLoading(false);
         };
 
@@ -112,6 +136,20 @@ const AdminDashboard: React.FC = () => {
         } catch (err) {
             console.error('Error resetting member:', err);
             alert('Failed to reset member. Please try again.');
+        }
+    };
+
+    // Delete a contact request
+    const handleDeleteContact = async (id: string) => {
+        const confirmed = window.confirm('Delete this contact request?');
+        if (!confirmed) return;
+
+        try {
+            await deleteDoc(doc(db, 'contact_requests', id));
+            setContactRequests(prev => prev.filter(c => c.id !== id));
+        } catch (err) {
+            console.error('Error deleting contact:', err);
+            alert('Failed to delete contact request.');
         }
     };
 
@@ -509,6 +547,99 @@ const AdminDashboard: React.FC = () => {
                     </table>
                 </div>
             </div>
+
+            {/* Contact Requests Section */}
+            {contactRequests.length > 0 && (
+                <div className="glass-card" style={{ marginTop: '1.5rem' }}>
+                    <h3 style={{
+                        margin: '0 0 1.25rem 0',
+                        fontSize: '1.25rem',
+                        fontFamily: 'var(--font-heading)',
+                        color: 'var(--color-primary)',
+                        display: 'flex',
+                        alignItems: 'center',
+                        gap: '0.5rem'
+                    }}>
+                        📬 Contact Requests
+                        <span style={{
+                            background: 'var(--color-primary)',
+                            color: 'white',
+                            padding: '0.2rem 0.6rem',
+                            borderRadius: '1rem',
+                            fontSize: '0.75rem',
+                            fontWeight: 600
+                        }}>
+                            {contactRequests.length}
+                        </span>
+                    </h3>
+
+                    <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
+                        {contactRequests.map((request) => (
+                            <div
+                                key={request.id}
+                                style={{
+                                    padding: '1rem',
+                                    background: 'rgba(169, 220, 227, 0.1)',
+                                    borderRadius: '0.75rem',
+                                    border: '1px solid var(--glass-border)'
+                                }}
+                            >
+                                <div style={{
+                                    display: 'flex',
+                                    justifyContent: 'space-between',
+                                    alignItems: 'flex-start',
+                                    marginBottom: '0.75rem'
+                                }}>
+                                    <div>
+                                        <p style={{ margin: 0, fontWeight: 600, fontSize: '1rem' }}>
+                                            {request.name}
+                                        </p>
+                                        <p style={{ margin: '0.25rem 0 0 0', fontSize: '0.85rem', color: 'var(--color-text-muted)' }}>
+                                            {request.email}
+                                            {request.phone && ` • ${request.phone}`}
+                                        </p>
+                                    </div>
+                                    <button
+                                        onClick={() => handleDeleteContact(request.id)}
+                                        style={{
+                                            background: 'none',
+                                            border: 'none',
+                                            color: 'var(--color-text-muted)',
+                                            cursor: 'pointer',
+                                            padding: '0.25rem',
+                                            fontSize: '1.25rem'
+                                        }}
+                                        title="Delete request"
+                                    >
+                                        ×
+                                    </button>
+                                </div>
+                                <p style={{
+                                    margin: 0,
+                                    fontSize: '0.9rem',
+                                    color: 'var(--color-text-main)',
+                                    lineHeight: 1.5
+                                }}>
+                                    {request.message}
+                                </p>
+                                <p style={{
+                                    margin: '0.75rem 0 0 0',
+                                    fontSize: '0.75rem',
+                                    color: 'var(--color-text-muted)'
+                                }}>
+                                    {request.createdAt?.toDate?.().toLocaleDateString('en-US', {
+                                        month: 'short',
+                                        day: 'numeric',
+                                        year: 'numeric',
+                                        hour: 'numeric',
+                                        minute: '2-digit'
+                                    }) || 'Just now'}
+                                </p>
+                            </div>
+                        ))}
+                    </div>
+                </div>
+            )}
         </DashboardLayout>
     );
 };

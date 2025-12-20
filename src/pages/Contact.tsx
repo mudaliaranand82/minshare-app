@@ -1,5 +1,7 @@
 import React, { useState } from 'react';
 import { Link } from 'react-router-dom';
+import { collection, addDoc, serverTimestamp } from 'firebase/firestore';
+import { db } from '../firebase';
 
 const Contact: React.FC = () => {
     const [formData, setFormData] = useState({
@@ -10,16 +12,27 @@ const Contact: React.FC = () => {
     });
     const [submitted, setSubmitted] = useState(false);
     const [loading, setLoading] = useState(false);
+    const [error, setError] = useState('');
 
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
         setLoading(true);
+        setError('');
 
-        // For now, just show success - in future could send email or store in Firebase
-        setTimeout(() => {
+        try {
+            // Save to Firestore
+            await addDoc(collection(db, 'contact_requests'), {
+                ...formData,
+                createdAt: serverTimestamp(),
+                status: 'new'
+            });
             setSubmitted(true);
+        } catch (err) {
+            console.error('Error saving contact request:', err);
+            setError('Failed to send message. Please try again.');
+        } finally {
             setLoading(false);
-        }, 1000);
+        }
     };
 
     const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
@@ -233,6 +246,17 @@ const Contact: React.FC = () => {
                     >
                         {loading ? 'Sending...' : 'Send Message'}
                     </button>
+
+                    {error && (
+                        <p style={{
+                            color: 'var(--color-danger)',
+                            textAlign: 'center',
+                            marginTop: '1rem',
+                            fontSize: '0.9rem'
+                        }}>
+                            {error}
+                        </p>
+                    )}
                 </form>
 
                 {/* Back link */}
