@@ -85,22 +85,22 @@ const Login: React.FC = () => {
                         <h1>MinShare</h1>
                     </div>
 
-                    <h2>Make the most of your club minimums</h2>
+                    <h2>Turn unused credits into something meaningful</h2>
                     <p className="hero-description">
-                        Members often lose unused food and beverage credits every month. MinShare helps you keep track, stay ahead, and share leftover value with staff or charity.
+                        At the end of each month, leftover F&B credits often go to waste. MinShare makes it easy to redirect that value to the people who make your club special.
                     </p>
 
                     <div className="feature-list">
                         <p className="feature-title">A simple way to</p>
                         <ul>
                             <li>
-                                <span className="bullet">•</span> track your monthly minimum
+                                <span className="bullet">•</span> give back to the staff who take care of you
                             </li>
                             <li>
-                                <span className="bullet">•</span> avoid unused credits
+                                <span className="bullet">•</span> support causes your club cares about
                             </li>
                             <li>
-                                <span className="bullet">•</span> share your remainder with people who make the club special
+                                <span className="bullet">•</span> make every dollar count, even the ones you don't spend
                             </li>
                         </ul>
                     </div>
@@ -112,8 +112,8 @@ const Login: React.FC = () => {
                 <div className="login-card-wrapper">
                     <div className="glass-card login-card">
                         <div className="text-center mb-6">
-                            <h2>Welcome back</h2>
-                            <p className="text-muted">Sign in to manage your monthly minimum and track your balance.</p>
+                            <h2>Welcome</h2>
+                            <p className="text-muted">Sign in to share your unused balance with those who matter.</p>
                         </div>
 
                         <button onClick={handleLogin} className="btn btn-primary login-btn" disabled={isLoading}>
