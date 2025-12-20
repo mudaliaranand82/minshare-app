@@ -35,7 +35,7 @@ const AddTransaction: React.FC<AddTransactionProps> = ({ onAdd, transactionCount
 
     return (
         <div style={{ height: '100%', display: 'flex', flexDirection: 'column' }}>
-            <h3 style={{ margin: '0 0 1rem 0', fontSize: '1.25rem', fontFamily: 'var(--font-heading)', color: 'var(--color-primary)' }}>Log Transactions</h3>
+            <h3 style={{ margin: '0 0 1rem 0', fontSize: '1.25rem', fontFamily: 'var(--font-heading)', color: 'var(--color-primary)' }}>Log Transaction</h3>
             <form onSubmit={handleSubmit} className="flex flex-col gap-4" style={{ flex: 1 }}>
                 <div>
                     <label style={{ display: 'block', marginBottom: '0.5rem', fontSize: '0.875rem', fontWeight: 500 }}>Amount ($)</label>
@@ -51,7 +51,7 @@ const AddTransaction: React.FC<AddTransactionProps> = ({ onAdd, transactionCount
                     />
                 </div>
                 <div>
-                    <label style={{ display: 'block', marginBottom: '0.5rem', fontSize: '0.875rem', fontWeight: 500 }}>Note</label>
+                    <label style={{ display: 'block', marginBottom: '0.5rem', fontSize: '0.875rem', fontWeight: 500 }}>Description (optional)</label>
                     <input
                         type="text"
                         value={description}
@@ -77,7 +77,7 @@ const AddTransaction: React.FC<AddTransactionProps> = ({ onAdd, transactionCount
                         <span className="flex items-center gap-2">
                             <span className="animate-spin">⏳</span> Adding...
                         </span>
-                    ) : 'Add Transaction'}
+                    ) : '+ Add Transaction'}
                 </button>
             </form>
         </div>
