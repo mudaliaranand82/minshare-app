@@ -87,7 +87,7 @@ const Login: React.FC = () => {
 
                     <h2>Turn unused credits into something meaningful</h2>
                     <p className="hero-description">
-                        At the end of each month, leftover F&B credits often go to waste. MinShare makes it easy to redirect that value to the people who make your club special.
+                        Members often lose unused food and beverage credits every month. MinShare makes it easy to redirect that value to the people who make your club special.
                     </p>
 
                     <div className="feature-list">
