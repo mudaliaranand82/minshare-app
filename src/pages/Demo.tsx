@@ -174,7 +174,7 @@ const Demo: React.FC = () => {
                 <div className="glass-card" style={{ marginBottom: '1.5rem' }}>
                     <div style={{
                         display: 'grid',
-                        gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))',
+                        gridTemplateColumns: '1fr 1fr',
                         gap: '1.5rem'
                     }}>
                         {/* Left: Add Transaction */}

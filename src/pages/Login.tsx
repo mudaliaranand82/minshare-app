@@ -142,7 +142,7 @@ const Login: React.FC = () => {
                                 gap: '0.5rem',
                                 marginTop: '0.75rem',
                                 padding: '0.875rem 1rem',
-                                borderRadius: '0.75rem',
+                                borderRadius: '1.5rem',
                                 fontWeight: 600,
                                 textDecoration: 'none',
                                 border: 'none'
