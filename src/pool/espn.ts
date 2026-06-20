@@ -31,6 +31,8 @@ export interface EspnAthlete {
   position?: string;
   thru?: string;
   rawStatus?: string;
+  /** Raw score value ESPN sent, for debugging (may be "CUT"/"WD"). */
+  rawScore?: string;
   isAmateur: boolean;
 }
 
@@ -148,6 +150,12 @@ function normalizeCompetitor(c: any): EspnAthlete | null {
     position: typeof position === 'string' ? position : undefined,
     thru,
     rawStatus: typeof rawStatus === 'string' ? rawStatus : undefined,
+    rawScore:
+      scoreRaw == null
+        ? undefined
+        : typeof scoreRaw === 'object'
+          ? JSON.stringify(scoreRaw)
+          : String(scoreRaw),
     isAmateur: athlete?.amateur === true || /\(a\)/i.test(displayName),
   };
 }

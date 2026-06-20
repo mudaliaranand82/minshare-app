@@ -271,6 +271,51 @@ export default function Pool() {
           </ul>
         </details>
       )}
+
+      {board && (
+        <details className="diag">
+          <summary>
+            ESPN debug — {board.athletes.length} players,{' '}
+            {board.athletes.filter((a) => a.missedCut).length} detected as cut
+          </summary>
+          <p className="muted">
+            Raw fields straight from ESPN. Find a player you KNOW missed the cut
+            and screenshot their row — the <code>position</code> /{' '}
+            <code>rawStatus</code> / <code>score</code> values tell me how ESPN
+            marks a cut so I can fix detection.
+          </p>
+          <div className="debug-scroll">
+            <table className="debug-table">
+              <thead>
+                <tr>
+                  <th>Player</th>
+                  <th className="num">toPar</th>
+                  <th>rawScore</th>
+                  <th>thru</th>
+                  <th>position</th>
+                  <th>rawStatus</th>
+                  <th>cut?</th>
+                </tr>
+              </thead>
+              <tbody>
+                {board.athletes.map((a) => (
+                  <tr key={a.id} className={a.missedCut ? 'is-cut' : ''}>
+                    <td>{a.displayName}</td>
+                    <td className="num">
+                      {a.toPar === null ? '—' : formatToPar(a.toPar)}
+                    </td>
+                    <td>{a.rawScore ?? '—'}</td>
+                    <td>{a.thru ?? '—'}</td>
+                    <td>{a.position ?? '—'}</td>
+                    <td>{a.rawStatus ?? '—'}</td>
+                    <td>{a.missedCut ? 'CUT' : ''}</td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        </details>
+      )}
     </div>
   );
 }

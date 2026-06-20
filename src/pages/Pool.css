@@ -412,6 +412,39 @@
   background: #dce9f5;
 }
 
+.debug-scroll {
+  max-height: 360px;
+  overflow: auto;
+  border: 1px solid #e0ebe4;
+  border-radius: 8px;
+}
+.debug-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 12px;
+  font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+}
+.debug-table th,
+.debug-table td {
+  text-align: left;
+  padding: 4px 8px;
+  border-bottom: 1px solid #eef4f0;
+  white-space: nowrap;
+}
+.debug-table th {
+  position: sticky;
+  top: 0;
+  background: #f0f6f2;
+  color: #4a5a50;
+}
+.debug-table .num {
+  text-align: right;
+}
+.debug-table tr.is-cut {
+  background: #fbe0db;
+  color: #a8392a;
+}
+
 .diag {
   margin: 24px 0;
   font-size: 13px;
