@@ -1,73 +1,30 @@
-# React + TypeScript + Vite
+# US Open Pool
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+Automated leaderboard for the annual US Open golf pool. Pulls the live
+leaderboard from ESPN's public golf API (in the browser), matches every
+entrant's picks to their players, applies the pool rules, ranks the field,
+and generates the results email.
 
-Currently, two official plugins are available:
+## Rules implemented
+- Pick one player from each group **A–E**, plus one **amateur (F)** for the tiebreaker.
+- An entry must have **4 of 5 picks make the cut** to be eligible.
+- **Default:** every made-cut pick is summed (matches the running sheet).
+- **"Best 4 of 5" toggle:** drops each entry's worst score (the email's final rule).
+- Ties broken by the amateur's **Round-1** score (lower wins).
+- Payouts: 1st $400 · 2nd $175 · 3rd $120 · 4th $75 · 5th $25.
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Babel](https://babeljs.io/) (or [oxc](https://oxc.rs) when used in [rolldown-vite](https://vite.dev/guide/rolldown)) for Fast Refresh
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/) for Fast Refresh
-
-## React Compiler
-
-The React Compiler is not enabled on this template because of its impact on dev & build performances. To add it, see [this documentation](https://react.dev/learn/react-compiler/installation).
-
-## Expanding the ESLint configuration
-
-If you are developing a production application, we recommend updating the configuration to enable type-aware lint rules:
-
-```js
-export default defineConfig([
-  globalIgnores(['dist']),
-  {
-    files: ['**/*.{ts,tsx}'],
-    extends: [
-      // Other configs...
-
-      // Remove tseslint.configs.recommended and replace with this
-      tseslint.configs.recommendedTypeChecked,
-      // Alternatively, use this for stricter rules
-      tseslint.configs.strictTypeChecked,
-      // Optionally, add this for stylistic rules
-      tseslint.configs.stylisticTypeChecked,
-
-      // Other configs...
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ['./tsconfig.node.json', './tsconfig.app.json'],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-])
+## Develop
+```bash
+npm install
+npm run dev      # http://localhost:5173
+npm run build
 ```
 
-You can also install [eslint-plugin-react-x](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-x) and [eslint-plugin-react-dom](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-dom) for React-specific lint rules:
+## Data
+- `src/pool/players.ts` — the field, by group (mirrors the pool sheet's Options lists).
+- `src/pool/entries.ts` — entrants' picks (edit here, or paste/import in the app).
+- `src/pool/espn.ts` — live ESPN leaderboard fetch + normalisation.
+- `src/pool/scoring.ts` — pool rules and ranking.
+- `src/pool/email.ts` — results-email text.
 
-```js
-// eslint.config.js
-import reactX from 'eslint-plugin-react-x'
-import reactDom from 'eslint-plugin-react-dom'
-
-export default defineConfig([
-  globalIgnores(['dist']),
-  {
-    files: ['**/*.{ts,tsx}'],
-    extends: [
-      // Other configs...
-      // Enable lint rules for React
-      reactX.configs['recommended-typescript'],
-      // Enable lint rules for React DOM
-      reactDom.configs.recommended,
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ['./tsconfig.node.json', './tsconfig.app.json'],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-])
-```
+Scores are always pulled live from ESPN; only picks are stored.
