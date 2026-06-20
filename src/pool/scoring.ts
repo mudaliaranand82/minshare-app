@@ -19,9 +19,19 @@ import { getPlayer } from './players';
 
 const SCORING_GROUPS: GroupId[] = ['A', 'B', 'C', 'D', 'E'];
 
+export interface ScoringOptions {
+  /**
+   * When true, apply the email's final rule: drop each entry's worst made-cut
+   * score so only the best 4 count. When false (default, matching Mike's
+   * running sheet), every made-cut pick is summed.
+   */
+  dropWorst?: boolean;
+}
+
 export function scoreEntry(
   entry: Entry,
   scores: Map<string, PlayerScore>,
+  options: ScoringOptions = {},
 ): ScoredEntry {
   const picks: ScoredPick[] = [];
 
@@ -53,12 +63,11 @@ export function scoreEntry(
   const madeCutCount = madeCut.length;
   const eligible = madeCutCount >= 4;
 
-  // Best-4 logic: from the made-cut picks, keep the 4 lowest (best) scores;
-  // drop the single worst performer ("lowest performer ... will be deleted").
-  const sortedBest = [...madeCut].sort(
-    (a, b) => (a.score.toPar! - b.score.toPar!),
-  );
-  const keep = sortedBest.slice(0, 4);
+  // Decide which made-cut picks count. By default every made-cut pick counts
+  // (matches Mike's running sheet). With dropWorst, keep only the best 4 —
+  // i.e. drop the single worst performer ("lowest performer ... deleted").
+  const sortedBest = [...madeCut].sort((a, b) => a.score.toPar! - b.score.toPar!);
+  const keep = options.dropWorst ? sortedBest.slice(0, 4) : sortedBest;
   const keepIds = new Set(keep.map((p) => p.playerId));
 
   let total = 0;
@@ -96,8 +105,9 @@ export function scoreEntry(
 export function scoreStandings(
   entries: Entry[],
   scores: Map<string, PlayerScore>,
+  options: ScoringOptions = {},
 ): ScoredEntry[] {
-  const scored = entries.map((e) => scoreEntry(e, scores));
+  const scored = entries.map((e) => scoreEntry(e, scores, options));
 
   // Rank: eligible entries first, by total asc, then tiebreaker asc.
   const eligible = scored
@@ -138,4 +148,9 @@ export function formatToPar(n: number | null): string {
   if (n === null) return '—';
   if (n === 0) return 'E';
   return n > 0 ? `+${n}` : `${n}`;
+}
+
+/** Format the amateur tiebreaker (a raw Round-1 figure) as a plain number. */
+export function formatTiebreak(n: number | null): string {
+  return n === null ? '—' : `${n}`;
 }

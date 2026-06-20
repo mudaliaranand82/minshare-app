@@ -163,6 +163,23 @@
 .standings {
   margin: 26px 0;
 }
+.payouts {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin: 0 0 14px;
+}
+.payout {
+  font-size: 12px;
+  background: #f0f6f2;
+  border: 1px solid #dbe8e0;
+  border-radius: 999px;
+  padding: 4px 10px;
+  color: #2a3a30;
+}
+.payout b {
+  color: #0b5d3b;
+}
 .standings table {
   width: 100%;
   border-collapse: collapse;

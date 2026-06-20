@@ -2,10 +2,11 @@ import { useCallback, useEffect, useMemo, useState } from 'react';
 import { fetchLeaderboard } from '../pool/espn';
 import type { EspnLeaderboard } from '../pool/espn';
 import { buildIndex, scoreAllPlayers } from '../pool/matching';
-import { scoreStandings, formatToPar } from '../pool/scoring';
+import { scoreStandings, formatToPar, formatTiebreak } from '../pool/scoring';
 import { buildEmail } from '../pool/email';
 import {
   DEFAULT_ENTRIES,
+  PAYOUTS,
   loadStoredEntries,
   storeEntries,
   clearStoredEntries,
@@ -30,6 +31,7 @@ export default function Pool() {
   const [importWarnings, setImportWarnings] = useState<string[]>([]);
   const [expanded, setExpanded] = useState<Set<string>>(new Set());
   const [autoRefresh, setAutoRefresh] = useState(true);
+  const [dropWorst, setDropWorst] = useState(false);
   const [copied, setCopied] = useState(false);
 
   const refresh = useCallback(async () => {
@@ -67,13 +69,13 @@ export default function Pool() {
 
   const standings: ScoredEntry[] = useMemo(() => {
     if (!board) return [];
-    return scoreStandings(entries, scores);
-  }, [entries, scores, board]);
+    return scoreStandings(entries, scores, { dropWorst });
+  }, [entries, scores, board, dropWorst]);
 
   const emailText = useMemo(() => {
     if (!board || standings.length === 0) return '';
-    return buildEmail(standings, board.meta);
-  }, [standings, board]);
+    return buildEmail(standings, board.meta, PAYOUTS, dropWorst);
+  }, [standings, board, dropWorst]);
 
   // Diagnostics: pool players that could not be matched to an ESPN athlete.
   const unmatched = useMemo(() => {
@@ -132,6 +134,17 @@ export default function Pool() {
           </p>
         </div>
         <div className="pool-actions">
+          <label
+            className="auto-toggle"
+            title="Email rule: only your best 4 of 5 count (drop your worst score). Off = sum every made-cut pick, matching Mike's running sheet."
+          >
+            <input
+              type="checkbox"
+              checked={dropWorst}
+              onChange={(e) => setDropWorst(e.target.checked)}
+            />
+            Best 4 of 5
+          </label>
           <label className="auto-toggle">
             <input
               type="checkbox"
@@ -225,6 +238,17 @@ export default function Pool() {
       {board && entries.length > 0 && (
         <section className="standings">
           <h2>Leaderboard</h2>
+          <div className="payouts">
+            {PAYOUTS.map((p, i) => {
+              const winner = standings.find((e) => e.rank === i + 1);
+              return (
+                <span key={p.place} className="payout">
+                  <b>{p.place}</b> ${p.amount}
+                  {winner ? ` · ${winner.name}` : ''}
+                </span>
+              );
+            })}
+          </div>
           <table>
             <thead>
               <tr>
@@ -306,7 +330,7 @@ function EntryRow({
           {entry.madeCutCount}/5
           {!entry.eligible && <span className="badge">need 4</span>}
         </td>
-        <td className="num">{formatToPar(entry.tiebreaker)}</td>
+        <td className="num">{formatTiebreak(entry.tiebreaker)}</td>
         <td className="num caret">{open ? '▾' : '▸'}</td>
       </tr>
       {open && (
@@ -339,7 +363,7 @@ function EntryRow({
                   <span className="grp">F</span>
                   <span className="plabel">{entry.amateurLabel}</span>
                   <span className="pscore">
-                    R1 {formatToPar(entry.tiebreaker)}
+                    R1 {formatTiebreak(entry.tiebreaker)}
                   </span>
                   <span className="tag">tiebreak</span>
                 </div>
