@@ -7,6 +7,7 @@ import Onboarding from './pages/Onboarding';
 import Profile from './pages/Profile';
 import Dashboard from './pages/Dashboard';
 import AdminDashboard from './pages/AdminDashboard';
+import Pool from './pages/Pool';
 import { PrivateRoute } from './components/PrivateRoute';
 
 function App() {
@@ -17,6 +18,7 @@ function App() {
           <Route path="/login" element={<Login />} />
           <Route path="/contact" element={<Contact />} />
           <Route path="/demo" element={<Demo />} />
+          <Route path="/pool" element={<Pool />} />
           <Route path="/onboarding" element={
             <PrivateRoute>
               <Onboarding />
