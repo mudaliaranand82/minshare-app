@@ -31,7 +31,8 @@ export default function Pool() {
   const [importWarnings, setImportWarnings] = useState<string[]>([]);
   const [expanded, setExpanded] = useState<Set<string>>(new Set());
   const [autoRefresh, setAutoRefresh] = useState(true);
-  const [dropWorst, setDropWorst] = useState(false);
+  // Pool rule: only your best 4 of 5 count (drop your worst). Default on.
+  const [dropWorst, setDropWorst] = useState(true);
   const [copied, setCopied] = useState(false);
 
   const refresh = useCallback(async () => {
@@ -136,7 +137,7 @@ export default function Pool() {
         <div className="pool-actions">
           <label
             className="auto-toggle"
-            title="Email rule: only your best 4 of 5 count (drop your worst score). Off = sum every made-cut pick, matching Mike's running sheet."
+            title="Pool rule (on by default): only your best 4 of 5 count — your worst score is dropped. Uncheck to instead sum every made-cut pick."
           >
             <input
               type="checkbox"
