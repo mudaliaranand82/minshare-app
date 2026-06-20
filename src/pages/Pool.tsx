@@ -3,7 +3,6 @@ import { fetchLeaderboard } from '../pool/espn';
 import type { EspnLeaderboard } from '../pool/espn';
 import { buildIndex, scoreAllPlayers } from '../pool/matching';
 import { scoreStandings, formatToPar, formatTiebreak } from '../pool/scoring';
-import { buildEmail } from '../pool/email';
 import {
   DEFAULT_ENTRIES,
   PAYOUTS,
@@ -32,7 +31,6 @@ export default function Pool() {
   const [autoRefresh, setAutoRefresh] = useState(true);
   // Pool rule: only your best 4 of 5 count (drop your worst). Default on.
   const [dropWorst, setDropWorst] = useState(true);
-  const [copied, setCopied] = useState(false);
 
   const refresh = useCallback(async () => {
     setLoading(true);
@@ -72,11 +70,6 @@ export default function Pool() {
     return scoreStandings(entries, scores, { dropWorst });
   }, [entries, scores, board, dropWorst]);
 
-  const emailText = useMemo(() => {
-    if (!board || standings.length === 0) return '';
-    return buildEmail(standings, board.meta, PAYOUTS, dropWorst);
-  }, [standings, board, dropWorst]);
-
   // Diagnostics: pool players that could not be matched to an ESPN athlete.
   const unmatched = useMemo(() => {
     if (!board) return [];
@@ -102,16 +95,6 @@ export default function Pool() {
       else next.add(name);
       return next;
     });
-  };
-
-  const copyEmail = async () => {
-    try {
-      await navigator.clipboard.writeText(emailText);
-      setCopied(true);
-      setTimeout(() => setCopied(false), 1800);
-    } catch {
-      /* clipboard may be blocked; the textarea is selectable as a fallback */
-    }
   };
 
   const eligibleCount = standings.filter((e) => e.eligible).length;
@@ -270,18 +253,6 @@ export default function Pool() {
               ))}
             </tbody>
           </table>
-        </section>
-      )}
-
-      {emailText && (
-        <section className="email">
-          <div className="email-head">
-            <h2>Results email</h2>
-            <button className="btn" onClick={copyEmail}>
-              {copied ? 'Copied!' : 'Copy email'}
-            </button>
-          </div>
-          <textarea readOnly value={emailText} rows={16} className="email-body" />
         </section>
       )}
 

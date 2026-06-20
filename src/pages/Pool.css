@@ -112,8 +112,7 @@
   margin: 20px 0;
 }
 .import h2,
-.standings h2,
-.email h2 {
+.standings h2 {
   margin: 0 0 10px;
   font-size: 18px;
   color: #0b5d3b;
@@ -129,8 +128,7 @@
   border-radius: 4px;
   font-size: 12px;
 }
-.import textarea,
-.email-body {
+.import textarea {
   width: 100%;
   box-sizing: border-box;
   font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
@@ -412,19 +410,6 @@
 .status.tiebreak {
   color: #2a5a8a;
   background: #dce9f5;
-}
-
-.email {
-  margin: 26px 0;
-}
-.email-head {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  margin-bottom: 10px;
-}
-.email-head h2 {
-  margin: 0;
 }
 
 .diag {
