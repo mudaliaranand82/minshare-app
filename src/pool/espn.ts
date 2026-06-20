@@ -1,7 +1,7 @@
 // Live leaderboard fetch + normalisation from ESPN's public golf API.
 //
 // Endpoint (CORS-open, no key required):
-//   https://site.api.espn.com/apis/site/v2/sports/golf/pga/leaderboard
+//   https://site.api.espn.com/apis/site/v2/sports/golf/pga/scoreboard
 //
 // The US Open lives under the PGA tour feed. The JSON shape is only loosely
 // documented, so every field access here is defensive and we keep the raw
@@ -9,8 +9,14 @@
 
 import type { LeaderboardMeta } from './types';
 
-const LEADERBOARD_URL =
-  'https://site.api.espn.com/apis/site/v2/sports/golf/pga/leaderboard';
+// Tried in order; the first that responds and has an event with players wins.
+// The /scoreboard path is ESPN's documented golf endpoint; the older
+// /leaderboard path 404s, so it's only a last-resort fallback.
+const ENDPOINTS = [
+  'https://site.api.espn.com/apis/site/v2/sports/golf/pga/scoreboard',
+  'https://site.api.espn.com/apis/site/v2/sports/golf/leaderboard',
+  'https://site.api.espn.com/apis/site/v2/sports/golf/pga/leaderboard',
+];
 
 export interface EspnAthlete {
   id: string;
@@ -118,16 +124,54 @@ function normalizeCompetitor(c: any): EspnAthlete | null {
   };
 }
 
+/** Count competitors in an event, to spot the one that actually has a field. */
+function eventSize(ev: any): number {
+  return (ev?.competitions?.[0]?.competitors ?? ev?.competitors ?? []).length;
+}
+
+/** Pick the most relevant event: prefer "US Open", then in-progress, then biggest. */
+function pickEvent(events: any[]): any {
+  if (!Array.isArray(events) || events.length === 0) return {};
+  const named = events.find((e) =>
+    /u\.?s\.?\s*open/i.test(`${e?.name ?? ''} ${e?.shortName ?? ''}`),
+  );
+  if (named && eventSize(named) > 0) return named;
+  const live = events.find(
+    (e) =>
+      (e?.competitions?.[0]?.status?.type?.state ?? e?.status?.type?.state) ===
+        'in' && eventSize(e) > 0,
+  );
+  if (live) return live;
+  return [...events].sort((a, b) => eventSize(b) - eventSize(a))[0] ?? events[0];
+}
+
+async function fetchFirstWorking(signal?: AbortSignal): Promise<any> {
+  let lastErr: unknown;
+  for (const url of ENDPOINTS) {
+    try {
+      const res = await fetch(url, { signal });
+      if (!res.ok) {
+        lastErr = new Error(`ESPN ${res.status} ${res.statusText} (${url})`);
+        continue;
+      }
+      const data = await res.json();
+      if (data?.events?.length) return data;
+      lastErr = new Error(`ESPN returned no events (${url})`);
+    } catch (e) {
+      lastErr = e;
+    }
+  }
+  throw lastErr instanceof Error
+    ? lastErr
+    : new Error('Could not reach ESPN golf API.');
+}
+
 export async function fetchLeaderboard(
   signal?: AbortSignal,
 ): Promise<EspnLeaderboard> {
-  const res = await fetch(LEADERBOARD_URL, { signal });
-  if (!res.ok) {
-    throw new Error(`ESPN responded ${res.status} ${res.statusText}`);
-  }
-  const data: any = await res.json();
+  const data: any = await fetchFirstWorking(signal);
 
-  const event = data?.events?.[0] ?? {};
+  const event = pickEvent(data?.events ?? []);
   const competition = event?.competitions?.[0] ?? {};
   const statusType = competition?.status?.type ?? event?.status?.type ?? {};
 
