@@ -3,6 +3,7 @@
 import type { EspnAthlete } from './espn';
 import type { Player, PlayerScore } from './types';
 import { ALL_PLAYERS } from './players';
+import { isKnownCut } from './knownCuts';
 
 function norm(s: string): string {
   return s
@@ -67,11 +68,12 @@ export function matchPlayer(player: Player, index: MatchIndex): EspnAthlete | un
 
 /** Build a PlayerScore for a pool player given the ESPN index. */
 export function scoreForPlayer(player: Player, index: MatchIndex): PlayerScore {
+  const knownCut = isKnownCut(player.id);
   const a = matchPlayer(player, index);
   if (!a) {
     return {
       toPar: null,
-      missedCut: false,
+      missedCut: knownCut,
       round1: null,
       unmatched: true,
     };
@@ -80,7 +82,8 @@ export function scoreForPlayer(player: Player, index: MatchIndex): PlayerScore {
     espnId: a.id,
     espnName: a.displayName,
     toPar: a.toPar,
-    missedCut: a.missedCut,
+    // Authoritative cut override (final after round 2) OR ESPN's own flag.
+    missedCut: knownCut || a.missedCut,
     round1: a.round1,
     position: a.position,
     thru: a.thru,

@@ -98,6 +98,10 @@ export default function Pool() {
   };
 
   const eligibleCount = standings.filter((e) => e.eligible).length;
+  // Treat the cut as applied if ESPN says so OR we have any known cut in play.
+  const cutApplied =
+    !!board &&
+    (board.meta.cutApplied || [...scores.values()].some((s) => s.missedCut));
 
   return (
     <div className="pool">
@@ -247,7 +251,7 @@ export default function Pool() {
                   key={e.name}
                   entry={e}
                   open={expanded.has(e.name)}
-                  cutApplied={board.meta.cutApplied}
+                  cutApplied={cutApplied}
                   onToggle={() => toggle(e.name)}
                 />
               ))}
