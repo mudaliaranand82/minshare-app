@@ -61,6 +61,7 @@ export function scoreEntry(
     (p) => !p.score.missedCut && !p.score.unmatched && p.score.toPar !== null,
   );
   const madeCutCount = madeCut.length;
+  const missedCutCount = picks.filter((p) => p.score.missedCut).length;
   const eligible = madeCutCount >= 4;
 
   // Decide which made-cut picks count. By default every made-cut pick counts
@@ -93,6 +94,7 @@ export function scoreEntry(
     name: entry.name,
     picks,
     madeCutCount,
+    missedCutCount,
     total,
     eligible,
     tiebreaker,

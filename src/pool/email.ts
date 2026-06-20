@@ -55,13 +55,20 @@ export function buildEmail(
 
   if (ineligible.length > 0) {
     lines.push('');
-    lines.push('NOT YET ELIGIBLE (need 4 of 5 to make the cut)');
+    lines.push(
+      meta.cutApplied
+        ? `ELIMINATED (2+ picks missed the cut) — ${eligible.length} of ${
+            standings.length
+          } still alive`
+        : 'NOT YET ELIGIBLE (need 4 of 5 to make the cut)',
+    );
     lines.push('------------------------------------------');
     ineligible.forEach((e) => {
-      lines.push(
-        `   -  ${e.name} — ${e.madeCutCount}/5 made cut` +
-          (e.madeCutCount > 0 ? ` (${formatToPar(e.total)} so far)` : ''),
-      );
+      const reason =
+        meta.cutApplied && e.missedCutCount >= 2
+          ? `${e.missedCutCount} picks cut`
+          : `${e.madeCutCount}/5 made cut`;
+      lines.push(`   -  ${e.name} — ${reason}`);
     });
   }
 

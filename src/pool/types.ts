@@ -68,6 +68,8 @@ export interface ScoredEntry {
   picks: ScoredPick[];
   /** Number of A-E picks that made the cut. */
   madeCutCount: number;
+  /** Number of A-E picks that missed the cut (2+ means eliminated). */
+  missedCutCount: number;
   /** Sum of the counted (best 4) made-cut scores, to par. */
   total: number;
   /** Eligible to win: at least 4 of 5 made the cut. */

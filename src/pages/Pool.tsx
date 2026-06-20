@@ -9,7 +9,6 @@ import {
   PAYOUTS,
   loadStoredEntries,
   storeEntries,
-  clearStoredEntries,
   parsePicks,
 } from '../pool/entries';
 import { ALL_PLAYERS } from '../pool/players';
@@ -96,12 +95,6 @@ export default function Pool() {
     }
   };
 
-  const handleClear = () => {
-    clearStoredEntries();
-    setEntries([]);
-    setShowImport(true);
-  };
-
   const toggle = (name: string) => {
     setExpanded((prev) => {
       const next = new Set(prev);
@@ -135,17 +128,6 @@ export default function Pool() {
           </p>
         </div>
         <div className="pool-actions">
-          <label
-            className="auto-toggle"
-            title="Pool rule (on by default): only your best 4 of 5 count — your worst score is dropped. Uncheck to instead sum every made-cut pick."
-          >
-            <input
-              type="checkbox"
-              checked={dropWorst}
-              onChange={(e) => setDropWorst(e.target.checked)}
-            />
-            Best 4 of 5
-          </label>
           <label className="auto-toggle">
             <input
               type="checkbox"
@@ -187,9 +169,6 @@ export default function Pool() {
         <div className="toolbar">
           <button className="btn ghost" onClick={() => setShowImport(true)}>
             Edit picks
-          </button>
-          <button className="btn ghost" onClick={handleClear}>
-            Clear picks
           </button>
         </div>
       )}
@@ -250,13 +229,31 @@ export default function Pool() {
               );
             })}
           </div>
+          <div className="scoring-bar">
+            <label className="switch">
+              <input
+                type="checkbox"
+                checked={dropWorst}
+                onChange={(e) => setDropWorst(e.target.checked)}
+              />
+              <span className="track"><span className="thumb" /></span>
+              <span className="switch-label">
+                Best 4 of 5
+                <small>
+                  {dropWorst
+                    ? 'Dropping each entry’s worst score'
+                    : 'Summing every made-cut pick'}
+                </small>
+              </span>
+            </label>
+          </div>
           <table>
             <thead>
               <tr>
                 <th className="rank">#</th>
                 <th>Entry</th>
                 <th className="num">Total</th>
-                <th className="num">Cut</th>
+                <th className="num">Status</th>
                 <th className="num">Tiebreak</th>
                 <th></th>
               </tr>
@@ -267,6 +264,7 @@ export default function Pool() {
                   key={e.name}
                   entry={e}
                   open={expanded.has(e.name)}
+                  cutApplied={board.meta.cutApplied}
                   onToggle={() => toggle(e.name)}
                 />
               ))}
@@ -309,27 +307,33 @@ export default function Pool() {
 function EntryRow({
   entry,
   open,
+  cutApplied,
   onToggle,
 }: {
   entry: ScoredEntry;
   open: boolean;
+  cutApplied: boolean;
   onToggle: () => void;
 }) {
+  // Once the cut is applied, 2+ missed-cut picks means permanent elimination.
+  const eliminated = cutApplied && entry.missedCutCount >= 2;
+  const rowClass = eliminated ? 'eliminated' : entry.eligible ? '' : 'ineligible';
   return (
     <>
-      <tr
-        className={entry.eligible ? '' : 'ineligible'}
-        onClick={onToggle}
-        style={{ cursor: 'pointer' }}
-      >
-        <td className="rank">{entry.rank ?? '—'}</td>
+      <tr className={rowClass} onClick={onToggle} style={{ cursor: 'pointer' }}>
+        <td className="rank">{eliminated ? '✕' : (entry.rank ?? '—')}</td>
         <td>{entry.name}</td>
         <td className="num strong">
           {entry.eligible ? formatToPar(entry.total) : '—'}
         </td>
         <td className="num">
-          {entry.madeCutCount}/5
-          {!entry.eligible && <span className="badge">need 4</span>}
+          {eliminated ? (
+            <span className="badge out">Eliminated</span>
+          ) : entry.missedCutCount > 0 ? (
+            <span className="cut-note">{entry.missedCutCount} cut</span>
+          ) : (
+            'In'
+          )}
         </td>
         <td className="num">{formatTiebreak(entry.tiebreaker)}</td>
         <td className="num caret">{open ? '▾' : '▸'}</td>

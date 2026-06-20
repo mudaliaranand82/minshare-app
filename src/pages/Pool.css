@@ -163,6 +163,85 @@
 .standings {
   margin: 26px 0;
 }
+
+/* Prominent scoring toggle above the table */
+.scoring-bar {
+  display: flex;
+  align-items: center;
+  margin: 4px 0 14px;
+  padding: 12px 14px;
+  background: #eef6f1;
+  border: 1px solid #cfe6d9;
+  border-radius: 10px;
+}
+.switch {
+  display: inline-flex;
+  align-items: center;
+  gap: 12px;
+  cursor: pointer;
+  user-select: none;
+}
+.switch input {
+  position: absolute;
+  opacity: 0;
+  width: 0;
+  height: 0;
+}
+.switch .track {
+  position: relative;
+  width: 46px;
+  height: 26px;
+  background: #c2d2c8;
+  border-radius: 999px;
+  transition: background 0.15s ease;
+  flex: none;
+}
+.switch .thumb {
+  position: absolute;
+  top: 3px;
+  left: 3px;
+  width: 20px;
+  height: 20px;
+  background: #fff;
+  border-radius: 50%;
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.25);
+  transition: transform 0.15s ease;
+}
+.switch input:checked + .track {
+  background: #0b5d3b;
+}
+.switch input:checked + .track .thumb {
+  transform: translateX(20px);
+}
+.switch-label {
+  display: flex;
+  flex-direction: column;
+  font-weight: 700;
+  font-size: 15px;
+  color: #0b3d28;
+}
+.switch-label small {
+  font-weight: 500;
+  font-size: 12px;
+  color: #5a7065;
+}
+
+/* Eliminated entries */
+.standings tr.eliminated {
+  color: #b0392a;
+  background: #fdf3f1;
+}
+.standings tr.eliminated td.rank {
+  color: #b0392a;
+}
+.badge.out {
+  background: #fbe0db;
+  color: #a8392a;
+}
+.cut-note {
+  font-size: 11px;
+  color: #b07a3a;
+}
 .payouts {
   display: flex;
   flex-wrap: wrap;

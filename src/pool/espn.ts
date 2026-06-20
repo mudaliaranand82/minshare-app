@@ -50,10 +50,22 @@ function parToNumber(value: unknown): number | null {
   return Number.isFinite(n) ? n : null;
 }
 
-const CUT_RE = /\b(cut|mc|mdf|wd|dq|dsq|withdraw|disqualif)\b/i;
+// Substrings that always mean "didn't make it to the weekend".
+const CUT_WORDS = /(cut|withdr|disqual|forfeit|did not finish)/i;
+// Standalone abbreviations (handles "STATUS_WD", "T-MC", "MC", etc.).
+const CUT_TOKENS = new Set(['mc', 'wd', 'wdr', 'dq', 'dsq', 'mdf', 'dnf', 'dns']);
 
 function looksCut(...texts: (unknown | undefined)[]): boolean {
-  return texts.some((t) => typeof t === 'string' && CUT_RE.test(t));
+  for (const t of texts) {
+    if (typeof t !== 'string' || t === '') continue;
+    const s = t.toLowerCase();
+    // Matches "STATUS_CUT", "Cut", "Missed Cut", "Withdrawn", etc.
+    if (CUT_WORDS.test(s)) return true;
+    for (const tok of s.split(/[^a-z]+/)) {
+      if (tok && CUT_TOKENS.has(tok)) return true;
+    }
+  }
+  return false;
 }
 
 /* eslint-disable @typescript-eslint/no-explicit-any */
@@ -99,11 +111,26 @@ function normalizeCompetitor(c: any): EspnAthlete | null {
   }
 
   const rawStatus =
-    status?.type?.description ?? status?.type?.name ?? position ?? '';
+    status?.type?.description ??
+    status?.type?.name ??
+    status?.type?.shortDetail ??
+    position ??
+    '';
 
   const missedCut =
-    looksCut(position, rawStatus, status?.type?.name, status?.type?.shortDetail) ||
-    positionId === '0';
+    looksCut(
+      position,
+      rawStatus,
+      status?.type?.name,
+      status?.type?.id,
+      status?.type?.detail,
+      status?.type?.shortDetail,
+      status?.type?.description,
+      typeof scoreRaw === 'string' ? scoreRaw : undefined,
+    ) ||
+    positionId === '0' ||
+    c?.didNotMakeCut === true ||
+    c?.cut === true;
 
   const thru =
     status?.thru === 0
