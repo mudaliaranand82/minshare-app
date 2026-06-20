@@ -26,7 +26,7 @@ export interface EspnAthlete {
   /** Total score to par; null if not available. */
   toPar: number | null;
   /** Round 1 score to par; null if not available. */
-  round1ToPar: number | null;
+  round1: number | null;
   missedCut: boolean;
   position?: string;
   thru?: string;
@@ -84,17 +84,18 @@ function normalizeCompetitor(c: any): EspnAthlete | null {
   const scoreRaw = c?.score?.displayValue ?? c?.score ?? status?.score;
   const toPar = parToNumber(scoreRaw);
 
-  // Per-round figures live in linescores[]. We want round 1's to-par.
-  let round1ToPar: number | null = null;
+  // Per-round figures live in linescores[]. The tiebreaker is the amateur's
+  // score at the END OF ROUND 1 (strokes, e.g. 72) — matching the pool sheet.
+  let round1: number | null = null;
   const lines = c?.linescores;
   if (Array.isArray(lines) && lines.length > 0) {
     const r1 =
       lines.find((l: any) => (l?.period ?? l?.round) === 1) ?? lines[0];
-    // linescore.value is strokes for the round; we want to-par for that day.
-    round1ToPar =
-      parToNumber(r1?.toPar) ??
+    // linescore.value is the round's stroke total; prefer it.
+    round1 =
+      parToNumber(r1?.value) ??
       parToNumber(r1?.displayValue) ??
-      parToNumber(r1?.value);
+      parToNumber(r1?.toPar);
   }
 
   const rawStatus =
@@ -115,7 +116,7 @@ function normalizeCompetitor(c: any): EspnAthlete | null {
     first,
     last,
     toPar,
-    round1ToPar,
+    round1,
     missedCut,
     position: typeof position === 'string' ? position : undefined,
     thru,

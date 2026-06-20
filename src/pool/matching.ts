@@ -72,7 +72,7 @@ export function scoreForPlayer(player: Player, index: MatchIndex): PlayerScore {
     return {
       toPar: null,
       missedCut: false,
-      round1ToPar: null,
+      round1: null,
       unmatched: true,
     };
   }
@@ -81,7 +81,7 @@ export function scoreForPlayer(player: Player, index: MatchIndex): PlayerScore {
     espnName: a.displayName,
     toPar: a.toPar,
     missedCut: a.missedCut,
-    round1ToPar: a.round1ToPar,
+    round1: a.round1,
     position: a.position,
     thru: a.thru,
     rawStatus: a.rawStatus,

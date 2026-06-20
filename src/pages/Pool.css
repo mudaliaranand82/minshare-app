@@ -230,58 +230,109 @@
 
 .detail-row td {
   background: #f7faf8;
-  padding: 0;
-}
-.picks {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 8px;
   padding: 12px;
 }
-.pick {
-  display: flex;
-  align-items: center;
-  gap: 8px;
+
+/* Per-participant picks table */
+.picks-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 13px;
   background: #fff;
   border: 1px solid #e0ebe4;
   border-radius: 8px;
-  padding: 6px 10px;
-  font-size: 13px;
+  overflow: hidden;
 }
-.pick.dropped {
-  opacity: 0.6;
+.picks-table th,
+.picks-table td {
+  text-align: left;
+  padding: 8px 10px;
+  border-bottom: 1px solid #eef4f0;
 }
-.pick.counted {
-  border-color: #b8dcc6;
-  background: #f3fbf6;
+.picks-table thead th {
+  font-size: 11px;
+  text-transform: uppercase;
+  letter-spacing: 0.4px;
+  color: #6a7a70;
+  background: #f0f6f2;
 }
-.pick.amateur {
-  border-style: dashed;
-}
-.pick .grp {
+.picks-table .grp {
+  width: 36px;
   font-weight: 700;
   color: #0b5d3b;
-  width: 14px;
 }
-.pick .plabel {
+.picks-table .num {
+  text-align: right;
+  font-variant-numeric: tabular-nums;
+}
+.picks-table .score {
+  font-weight: 600;
+  color: #16261c;
+}
+.picks-table .strong {
+  font-weight: 800;
+  color: #0b5d3b;
+}
+
+/* Row state cues */
+.picks-table tr.r-counts {
+  background: #f3fbf6;
+}
+.picks-table tr.r-counts .score {
+  color: #0b7a47;
+}
+.picks-table tr.r-dropped {
+  color: #98a89e;
+}
+.picks-table tr.r-dropped .score {
+  text-decoration: line-through;
+  color: #b04a3a;
+}
+.picks-table tr.r-cut {
+  color: #98a89e;
+}
+.picks-table tr.r-cut .score {
+  color: #b04a3a;
+  font-style: italic;
+}
+.picks-table tr.r-amateur {
+  background: #fafbf6;
+  font-style: italic;
+}
+.picks-table tfoot td {
+  border-top: 2px solid #dbe8e0;
+  border-bottom: none;
   font-weight: 600;
 }
-.pick .pscore {
-  font-variant-numeric: tabular-nums;
-  color: #4a5a50;
+
+/* Status pills */
+.status {
+  display: inline-block;
+  font-size: 11px;
+  font-weight: 600;
+  padding: 2px 8px;
+  border-radius: 999px;
+  white-space: nowrap;
 }
-.pick .tag {
-  font-size: 10px;
-  text-transform: uppercase;
-  letter-spacing: 0.3px;
-  color: #9ab0a4;
-  background: #eef4f0;
-  padding: 1px 6px;
-  border-radius: 10px;
-}
-.pick .tag.ok {
+.status.counts {
   color: #0b7a47;
   background: #d8f0e2;
+}
+.status.dropped {
+  color: #8a5a14;
+  background: #fdeccf;
+}
+.status.cut {
+  color: #a8392a;
+  background: #fbe0db;
+}
+.status.none {
+  color: #6a7a70;
+  background: #eef2ef;
+}
+.status.tiebreak {
+  color: #2a5a8a;
+  background: #dce9f5;
 }
 
 .email {

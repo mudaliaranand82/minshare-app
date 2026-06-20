@@ -42,10 +42,10 @@ export function scoreEntry(
       ? scores.get(player.id) ?? {
           toPar: null,
           missedCut: false,
-          round1ToPar: null,
+          round1: null,
           unmatched: true,
         }
-      : { toPar: null, missedCut: false, round1ToPar: null, unmatched: true };
+      : { toPar: null, missedCut: false, round1: null, unmatched: true };
 
     picks.push({
       group,
@@ -87,7 +87,7 @@ export function scoreEntry(
   const amId = entry.picks.F;
   const amPlayer = amId ? getPlayer(amId) : undefined;
   const amScore = amPlayer ? scores.get(amPlayer.id) : undefined;
-  const tiebreaker = amScore?.round1ToPar ?? null;
+  const tiebreaker = amScore?.round1 ?? null;
 
   return {
     name: entry.name,

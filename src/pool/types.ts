@@ -39,7 +39,7 @@ export interface PlayerScore {
   /** True when the player has missed the cut / WD / DQ. */
   missedCut: boolean;
   /** Day-1 (round 1) score to par, used for amateur tiebreakers. */
-  round1ToPar: number | null;
+  round1: number | null;
   /** Position string from ESPN, e.g. "T5", "CUT". */
   position?: string;
   /** Holes played indicator, e.g. "F", "12", "thru 9". */

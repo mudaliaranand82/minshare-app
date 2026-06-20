@@ -13,7 +13,7 @@ import {
   parsePicks,
 } from '../pool/entries';
 import { ALL_PLAYERS } from '../pool/players';
-import type { Entry, PlayerScore, ScoredEntry } from '../pool/types';
+import type { Entry, PlayerScore, ScoredEntry, ScoredPick } from '../pool/types';
 import './Pool.css';
 
 const REFRESH_MS = 90_000;
@@ -337,39 +337,65 @@ function EntryRow({
       {open && (
         <tr className="detail-row">
           <td colSpan={6}>
-            <div className="picks">
-              {entry.picks.map((p) => (
-                <div
-                  key={p.group}
-                  className={`pick ${p.counted ? 'counted' : 'dropped'}`}
-                >
-                  <span className="grp">{p.group}</span>
-                  <span className="plabel">{p.label}</span>
-                  <span className="pscore">
-                    {p.score.unmatched
-                      ? 'no match'
-                      : p.score.missedCut
-                        ? 'MC'
-                        : formatToPar(p.score.toPar)}
-                  </span>
-                  {p.counted ? (
-                    <span className="tag ok">counts</span>
-                  ) : (
-                    <span className="tag">{dropLabel(p.dropReason)}</span>
-                  )}
-                </div>
-              ))}
-              {entry.amateurLabel && (
-                <div className="pick amateur">
-                  <span className="grp">F</span>
-                  <span className="plabel">{entry.amateurLabel}</span>
-                  <span className="pscore">
-                    R1 {formatTiebreak(entry.tiebreaker)}
-                  </span>
-                  <span className="tag">tiebreak</span>
-                </div>
-              )}
-            </div>
+            <table className="picks-table">
+              <thead>
+                <tr>
+                  <th className="grp">Grp</th>
+                  <th>Player</th>
+                  <th className="num">Score</th>
+                  <th>Status</th>
+                </tr>
+              </thead>
+              <tbody>
+                {entry.picks.map((p) => {
+                  const rowClass = p.counted
+                    ? 'r-counts'
+                    : p.score.missedCut
+                      ? 'r-cut'
+                      : 'r-dropped';
+                  return (
+                    <tr key={p.group} className={rowClass}>
+                      <td className="grp">{p.group}</td>
+                      <td>{p.label}</td>
+                      <td className="num score">
+                        {p.score.unmatched
+                          ? '—'
+                          : p.score.missedCut
+                            ? 'Cut'
+                            : formatToPar(p.score.toPar)}
+                      </td>
+                      <td>{statusBadge(p)}</td>
+                    </tr>
+                  );
+                })}
+                {entry.amateurLabel && (
+                  <tr className="r-amateur">
+                    <td className="grp">F</td>
+                    <td>{entry.amateurLabel}</td>
+                    <td className="num score">
+                      {formatTiebreak(entry.tiebreaker)}
+                    </td>
+                    <td>
+                      <span className="status tiebreak">Tiebreaker · R1</span>
+                    </td>
+                  </tr>
+                )}
+              </tbody>
+              <tfoot>
+                <tr>
+                  <td className="grp"></td>
+                  <td>Total (best 4 count)</td>
+                  <td className="num score strong">
+                    {entry.eligible ? formatToPar(entry.total) : '—'}
+                  </td>
+                  <td className="muted">
+                    {entry.eligible
+                      ? `${entry.picks.filter((p) => p.counted).length} counted, 1 dropped`
+                      : `${entry.madeCutCount}/5 made cut — need 4`}
+                  </td>
+                </tr>
+              </tfoot>
+            </table>
           </td>
         </tr>
       )}
@@ -377,15 +403,11 @@ function EntryRow({
   );
 }
 
-function dropLabel(reason?: string): string {
-  switch (reason) {
-    case 'missed-cut':
-      return 'missed cut';
-    case 'worst-performer':
-      return 'dropped (worst)';
-    case 'unmatched':
-      return 'no match';
-    default:
-      return 'not counted';
-  }
+function statusBadge(p: ScoredPick) {
+  if (p.counted) return <span className="status counts">✓ Counts</span>;
+  if (p.dropReason === 'missed-cut')
+    return <span className="status cut">Cut — no score</span>;
+  if (p.dropReason === 'unmatched')
+    return <span className="status none">No ESPN match</span>;
+  return <span className="status dropped">▼ Dropped (worst)</span>;
 }
